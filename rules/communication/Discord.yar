@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Discord Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://discord.com/developers/docs
@@ -25,8 +26,8 @@ rule Discord_Bot_Token
 {
     meta:
         description    = "Detects Discord bot tokens (standard and MFA variants)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://discord.com/developers/docs/topics/oauth2"
         confidence     = "HIGH"
@@ -50,8 +51,8 @@ rule Discord_Webhook_URL
 {
     meta:
         description    = "Detects Discord Incoming Webhook URLs (used for C2 in malware and for notification abuse)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://discord.com/developers/docs/resources/webhook"
         confidence     = "HIGH"
@@ -73,8 +74,8 @@ rule Discord_OAuth2_Client_Secret
 {
     meta:
         description    = "Detects Discord OAuth2 application client secrets in config or env files"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "MEDIUM"
         false_positive = "MEDIUM"
