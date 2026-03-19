@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Microsoft Copilot / GitHub Copilot Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/authenticate-copilot-cli
@@ -37,8 +38,8 @@ rule GitHub_Copilot_Token_Env
 {
     meta:
         description    = "Detects GitHub Copilot CLI authentication tokens in environment variables or CI/CD config"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/authenticate-copilot-cli"
         confidence     = "HIGH"
@@ -63,8 +64,8 @@ rule GitHub_Copilot_OAuth_Config_File
 {
     meta:
         description    = "Detects GitHub Copilot CLI OAuth token stored in ~/.copilot/config.json"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/authenticate-copilot-cli"
         confidence     = "HIGH"
@@ -92,8 +93,8 @@ rule Microsoft_Security_Copilot_Plugin_API_Key
 {
     meta:
         description    = "Detects Microsoft Security Copilot plugin manifest with API key authentication"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://learn.microsoft.com/en-us/copilot/security/plugin-api"
         confidence     = "HIGH"
@@ -122,8 +123,8 @@ rule GitHub_Copilot_PAT_Billing_Scope
 {
     meta:
         description    = "Detects GitHub PAT tokens with Copilot billing management scope (manage_billing:copilot)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://www.stitchflow.com/user-management/github-copilot/api"
         confidence     = "MEDIUM"
@@ -154,8 +155,8 @@ rule Chat_Copilot_Backend_Config
 {
     meta:
         description    = "Detects microsoft/chat-copilot backend configuration containing AI API keys"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://github.com/microsoft/chat-copilot"
         confidence     = "MEDIUM"
