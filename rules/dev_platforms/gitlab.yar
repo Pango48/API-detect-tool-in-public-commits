@@ -1,6 +1,7 @@
 /*
  * YARA Rules: GitLab Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://docs.gitlab.com/ee/security/tokens/
@@ -26,7 +27,7 @@ rule GitLab_Personal_Access_Token
 {
     meta:
         description    = "Detects GitLab Personal Access Tokens (glpat- prefix, introduced in GitLab 14.5)"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.gitlab.com/ee/security/tokens/token_troubleshooting.html"
@@ -54,7 +55,7 @@ rule GitLab_Deploy_Token
 {
     meta:
         description    = "Detects GitLab Deploy Tokens (gldt-) used for registry and repository read access in CI/CD pipelines"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.gitlab.com/ee/user/project/deploy_tokens/"
@@ -79,7 +80,7 @@ rule GitLab_CI_Job_Token
 {
     meta:
         description    = "Detects GitLab CI/CD Bridge tokens (glcbt-) and hardcoded CI_JOB_TOKEN references in scripts"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.gitlab.com/ee/ci/jobs/ci_job_token.html"
@@ -104,7 +105,7 @@ rule GitLab_Service_Account_Token
 {
     meta:
         description    = "Detects GitLab Service Account tokens (glsoat-) used for automated non-human access"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.gitlab.com/ee/user/profile/service_accounts.html"
@@ -126,7 +127,7 @@ rule GitLab_Agent_Token
 {
     meta:
         description    = "Detects GitLab Agent for Kubernetes tokens (glagent-) — grants cluster-level access"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.gitlab.com/ee/user/clusters/agent/"
@@ -148,7 +149,7 @@ rule GitLab_Runner_Registration_Token
 {
     meta:
         description    = "Detects GitLab Runner registration tokens — allows attacker-controlled runners to intercept CI/CD jobs"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.gitlab.com/runner/register/"
