@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Amazon Web Services (AWS) Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
@@ -28,8 +29,8 @@ rule AWS_Access_Key_ID
 {
     meta:
         description    = "Detects AWS Access Key IDs — all known IAM prefixes"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html"
         confidence     = "HIGH"
@@ -56,8 +57,8 @@ rule AWS_Secret_Access_Key
 {
     meta:
         description    = "Detects AWS Secret Access Keys based on known variable name patterns"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html"
         confidence     = "MEDIUM"
@@ -83,8 +84,8 @@ rule AWS_Session_Token
 {
     meta:
         description    = "Detects AWS temporary session tokens (STS AssumeRole output)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "MEDIUM"
         false_positive = "MEDIUM"
@@ -110,8 +111,8 @@ rule AWS_Credentials_File
 {
     meta:
         description    = "Detects AWS credentials file structure (~/.aws/credentials)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "HIGH"
         false_positive = "LOW"
@@ -135,8 +136,8 @@ rule AWS_MWS_Key
 {
     meta:
         description    = "Detects AWS Marketplace Web Service (MWS) authentication tokens"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "HIGH"
         false_positive = "LOW"
