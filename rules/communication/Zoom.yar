@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Zoom API Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://developers.zoom.us/docs/internal-apps/s2s-oauth/
@@ -29,8 +30,8 @@ rule Zoom_S2S_OAuth_Credentials
 {
     meta:
         description    = "Detects Zoom Server-to-Server OAuth credentials (Account ID + Client ID + Secret)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developers.zoom.us/docs/internal-apps/s2s-oauth/"
         confidence     = "HIGH"
@@ -60,8 +61,8 @@ rule Zoom_Legacy_JWT_Credentials
 {
     meta:
         description    = "Detects Zoom legacy JWT API Key and Secret (deprecated June 2023, still found in old repos)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developers.zoom.us/docs/internal-apps/jwt/"
         confidence     = "HIGH"
@@ -87,8 +88,8 @@ rule Zoom_OAuth_Access_Token
 {
     meta:
         description    = "Detects Zoom OAuth access tokens in Authorization headers or config files"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "MEDIUM"
         false_positive = "MEDIUM"
@@ -113,8 +114,8 @@ rule Zoom_Webhook_Secret_Token
 {
     meta:
         description    = "Detects Zoom Webhook Secret Tokens used to validate webhook event payloads"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developers.zoom.us/docs/api/rest/webhook-reference/"
         confidence     = "MEDIUM"
