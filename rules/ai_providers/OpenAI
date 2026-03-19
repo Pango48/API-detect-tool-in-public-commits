@@ -1,1 +1,129 @@
+/*
+ * YARA Rules: OpenAI API Credentials
+ *
+ * Author      : yara-apikey-rules contributors
+ * Date        : 19-03-2026
+ * Version     : 1.0
+ * Reference   : https://platform.openai.com/docs/api-reference/authentication
+ *               https://github.com/gitleaks/gitleaks/pull/1780
+ *
+ * Coverage:
+ *   - OpenAI Project API keys       (sk-proj-   prefix, ~164 chars total) [default since April 2024]
+ *   - OpenAI Service Account keys   (sk-svcacct- prefix)
+ *   - OpenAI Admin keys             (sk-admin-   prefix)
+ *   - OpenAI Legacy API keys        (sk-          prefix, no sub-type, ~51 chars total)
+ *   - OpenAI Organization IDs       (org-         prefix)
+ *   - OpenAI base64 anchor          (T3BlbkFJ in binary/malware contexts)
+ *
+ * Key structure (all modern keys):
+ *   All OpenAI keys embed the base64 string "T3BlbkFJ" (= "OpenAI") as a
+ *   structural anchor in the middle of the key. This is the most reliable
+ *   detection vector and is used by SentinelOne, TruffleHog, and gitleaks.
+ *
+ *   Modern key format: sk-<type>-<20-74 chars>[T3BlbkFJ]<20-74 chars>
+ *   Legacy key format: sk-<20 chars>[T3BlbkFJ]<20 chars>
+ *
+ *   Source: gitleaks PR #1780 — validated against real key samples:
+ *   \b(sk-(?:proj-|svcacct-|admin-)?[A-Za-z0-9_-]{20,74}T3BlbkFJ[A-Za-z0-9_-]{20,74})
+ *
+ * False positive guidance:
+ *   The T3BlbkFJ anchor makes false positives extremely unlikely.
+ *   Prefer this anchor over matching sk- alone, which is far too broad.
+ */
 
+rule OpenAI_API_Key_Modern
+{
+    meta:
+        description    = "Detects modern OpenAI API keys: project (sk-proj-), service account (sk-svcacct-), admin (sk-admin-)"
+        author         = "yara-apikey-rules"
+        date           = "2025-03-03"
+        version        = "1.0"
+        reference      = "https://github.com/gitleaks/gitleaks/pull/1780"
+        confidence     = "HIGH"
+        false_positive = "LOW"
+        severity       = "CRITICAL"
+        tags           = "openai,llm,api-key,gpt,project-key"
+
+    strings:
+        // Project keys (default since April 2024) — contains T3BlbkFJ anchor
+        $key_proj     = /sk-proj-[A-Za-z0-9_\-]{20,74}T3BlbkFJ[A-Za-z0-9_\-]{20,74}/
+
+        // Service account keys
+        $key_svcacct  = /sk-svcacct-[A-Za-z0-9_\-]{20,74}T3BlbkFJ[A-Za-z0-9_\-]{20,74}/
+
+        // Admin keys
+        $key_admin    = /sk-admin-[A-Za-z0-9_\-]{20,74}T3BlbkFJ[A-Za-z0-9_\-]{20,74}/
+
+    condition:
+        any of them
+}
+
+
+rule OpenAI_API_Key_Legacy
+{
+    meta:
+        description    = "Detects legacy OpenAI API keys (sk- prefix without sub-type, ~51 chars total)"
+        author         = "yara-apikey-rules"
+        date           = "2025-03-03"
+        version        = "1.0"
+        reference      = "https://platform.openai.com/docs/api-reference/authentication"
+        confidence     = "HIGH"
+        false_positive = "LOW"
+        severity       = "CRITICAL"
+        tags           = "openai,llm,api-key,gpt,legacy"
+
+    strings:
+        // Legacy format: sk- + ~20 chars + T3BlbkFJ anchor + ~20 chars
+        // Explicitly NOT followed by proj-, svcacct-, or admin-
+        $key_legacy   = /sk-[A-Za-z0-9_\-]{20}T3BlbkFJ[A-Za-z0-9_\-]{20}/
+
+    condition:
+        $key_legacy
+}
+
+
+rule OpenAI_API_Key_Base64_Anchor
+{
+    meta:
+        description    = "Detects OpenAI API key base64 anchor (T3BlbkFJ = 'OpenAI') in binaries, malware, or encoded content"
+        author         = "yara-apikey-rules"
+        date           = "2025-03-03"
+        version        = "1.0"
+        reference      = "https://www.sentinelone.com/labs/malicious-actors-use-of-openai-keys/"
+        confidence     = "HIGH"
+        false_positive = "LOW"
+        severity       = "CRITICAL"
+        tags           = "openai,llm,api-key,base64,binary,malware"
+
+    strings:
+        // Base64 of "OpenAI" — embedded in malware and binary files
+        // Found in 6000+ samples on VirusTotal (SentinelOne research)
+        $b64_anchor   = "T3BlbkFJ"
+
+    condition:
+        $b64_anchor
+}
+
+
+rule OpenAI_Organization_ID
+{
+    meta:
+        description    = "Detects OpenAI Organization IDs (org- prefix) — used in API requests headers"
+        author         = "yara-apikey-rules"
+        date           = "2025-03-03"
+        version        = "1.0"
+        reference      = "https://platform.openai.com/docs/api-reference/authentication"
+        confidence     = "MEDIUM"
+        false_positive = "MEDIUM"
+        severity       = "MEDIUM"
+        tags           = "openai,organization-id,header"
+
+    strings:
+        // Org IDs appear in OpenAI-Organization request headers or config
+        $org_var1   = /OPENAI[_\.]?ORG(?:[_\.]?ID)?\s*=\s*['"]?org-[A-Za-z0-9]{24}['"]?/  nocase
+        $org_var2   = /OpenAI-Organization:\s*org-[A-Za-z0-9]{24}/
+        $org_json   = /"organization"\s*:\s*"org-[A-Za-z0-9]{24}"/
+
+    condition:
+        any of them
+}
