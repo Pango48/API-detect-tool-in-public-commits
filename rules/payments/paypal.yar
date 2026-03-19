@@ -1,6 +1,7 @@
 /*
  * YARA Rules: PayPal Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://developer.paypal.com/api/rest/authentication/
@@ -28,7 +29,7 @@ rule PayPal_REST_API_Client_Secret
 {
     meta:
         description    = "Detects PayPal REST API Client Secret — sufficient to obtain a bearer token with full API access"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/api/rest/authentication/"
@@ -54,7 +55,7 @@ rule PayPal_REST_API_Full_Credentials
 {
     meta:
         description    = "Detects PayPal REST API Client ID and Client Secret present together in the same file — high-confidence leak"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/api/rest/authentication/"
@@ -86,7 +87,7 @@ rule PayPal_Sandbox_Credentials
 {
     meta:
         description    = "Detects PayPal Sandbox API credentials — lower severity but often reused in production and reveals payment architecture"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/tools/sandbox/accounts/"
@@ -114,7 +115,7 @@ rule PayPal_IPN_Token
 {
     meta:
         description    = "Detects PayPal Instant Payment Notification (IPN) tokens — allows forging payment notifications"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/api/nvp-soap/ipn/"
@@ -139,7 +140,7 @@ rule PayPal_Webhook_ID
 {
     meta:
         description    = "Detects PayPal Webhook IDs — used to validate inbound webhook events; leaking allows bypass of signature verification"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/api/webhooks/v1/"
