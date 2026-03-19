@@ -1,7 +1,7 @@
 /*
  * YARA Rules: SentinelOne API Credentials
  *
- * Author      : yara-apikey-rules contributors
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * License     : MIT
@@ -38,7 +38,7 @@ rule SentinelOne_API_Token_In_Header
 {
     meta:
         description    = "Detects SentinelOne API tokens in Authorization headers (ApiToken scheme)"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://usea1-partners.sentinelone.net/api-doc/"
@@ -63,7 +63,7 @@ rule SentinelOne_API_Token_In_Config
 {
     meta:
         description    = "Detects SentinelOne API tokens in config files, env files, or source code"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://www.ninjaone.com/docs/integrations/antivirus/sentinelone/"
@@ -93,7 +93,7 @@ rule SentinelOne_Credentials_Pair
 {
     meta:
         description    = "Detects SentinelOne management URL + API token pair — high confidence credential leak"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.alertlogic.com/configure/connections/sentinelone.htm"
@@ -118,7 +118,7 @@ rule SentinelOne_XDR_Visibility_Key
 {
     meta:
         description    = "Detects SentinelOne Singularity Data Lake / XDR Visibility Enhanced Key credentials"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.synqly.com/guides/provider-configuration/sentinelone-setup"
