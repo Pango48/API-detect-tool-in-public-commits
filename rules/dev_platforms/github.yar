@@ -1,6 +1,7 @@
 /*
  * YARA Rules: GitHub Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
