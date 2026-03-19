@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Stripe Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://stripe.com/docs/keys
