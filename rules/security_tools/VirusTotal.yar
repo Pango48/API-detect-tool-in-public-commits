@@ -1,6 +1,7 @@
 /*
  * YARA Rules: VirusTotal API Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://docs.virustotal.com/reference/overview
@@ -34,7 +35,7 @@ rule VirusTotal_API_Key_In_Header
 {
     meta:
         description    = "Detects VirusTotal API keys in HTTP headers (x-apikey) or curl commands"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.virustotal.com/reference/overview"
@@ -60,7 +61,7 @@ rule VirusTotal_API_Key_In_Config
 {
     meta:
         description    = "Detects VirusTotal API keys in config files, env files, and source code"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.virustotal.com/reference/overview"
