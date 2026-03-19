@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Braintree Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://developer.paypal.com/braintree/docs/reference/general/authentication/
@@ -29,7 +30,7 @@ rule Braintree_Private_Key
 {
     meta:
         description    = "Detects Braintree Private Keys — sufficient alone to perform server-side payment transactions"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/braintree/docs/reference/general/authentication/"
@@ -59,7 +60,7 @@ rule Braintree_Full_Credential_Set
 {
     meta:
         description    = "Detects Braintree full credential triad (Merchant ID + Public Key + Private Key) in the same file — confirmed leak"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/braintree/docs/reference/general/authentication/"
@@ -88,7 +89,7 @@ rule Braintree_Tokenization_Key
 {
     meta:
         description    = "Detects Braintree Tokenization Keys used for client-side card tokenization — reveals environment and merchant ID"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/braintree/docs/guides/authorization/tokenization-key"
@@ -116,7 +117,7 @@ rule Braintree_SDK_Gateway_With_Credentials
 {
     meta:
         description    = "Detects Braintree SDK gateway instantiation with hardcoded credentials across Ruby, Python, PHP, Node.js and Java"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://developer.paypal.com/braintree/docs/start/hello-server/"
