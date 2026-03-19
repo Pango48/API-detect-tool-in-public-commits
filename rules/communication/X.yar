@@ -1,6 +1,7 @@
 /*
  * YARA Rules: X (formerly Twitter) API Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://developer.x.com/en/docs/authentication
@@ -28,8 +29,8 @@ rule Twitter_X_Bearer_Token
 {
     meta:
         description    = "Detects X/Twitter OAuth 2.0 Bearer Tokens (app-only auth)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developer.x.com/en/docs/authentication/oauth-2-0/bearer-tokens"
         confidence     = "HIGH"
@@ -55,8 +56,8 @@ rule Twitter_X_API_Consumer_Keys
 {
     meta:
         description    = "Detects X/Twitter OAuth 1.0a Consumer Key and Secret pairs"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developer.x.com/en/docs/authentication/oauth-1-0a"
         confidence     = "MEDIUM"
@@ -82,8 +83,8 @@ rule Twitter_X_Access_Token
 {
     meta:
         description    = "Detects X/Twitter OAuth 1.0a Access Token and Access Token Secret"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developer.x.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens"
         confidence     = "MEDIUM"
