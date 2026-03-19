@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Google Cloud Platform (GCP) Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://cloud.google.com/iam/docs/service-account-creds
@@ -24,8 +25,8 @@ rule GCP_Service_Account_Key
 {
     meta:
         description    = "Detects GCP Service Account JSON key files"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://cloud.google.com/iam/docs/keys-create-delete"
         confidence     = "HIGH"
@@ -56,8 +57,8 @@ rule GCP_API_Key
 {
     meta:
         description    = "Detects Google/GCP/Firebase/Gemini API keys (AIza prefix, 39 chars)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://cloud.google.com/docs/authentication/api-keys"
         confidence     = "HIGH"
@@ -78,8 +79,8 @@ rule GCP_OAuth2_Client_Secret
 {
     meta:
         description    = "Detects GCP OAuth2 client secret file (client_secrets.json)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developers.google.com/identity/protocols/oauth2"
         confidence     = "HIGH"
@@ -108,8 +109,8 @@ rule GCP_OAuth2_Refresh_Token
 {
     meta:
         description    = "Detects GCP OAuth2 refresh tokens in config or credential files"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "MEDIUM"
         false_positive = "MEDIUM"
@@ -130,8 +131,8 @@ rule GCP_Application_Default_Credentials
 {
     meta:
         description    = "Detects GCP Application Default Credentials (ADC) JSON file structure"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://cloud.google.com/docs/authentication/application-default-credentials"
         confidence     = "HIGH"
