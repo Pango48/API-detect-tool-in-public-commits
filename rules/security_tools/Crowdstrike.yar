@@ -1,6 +1,7 @@
 /*
  * YARA Rules: CrowdStrike Falcon API Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://www.crowdstrike.com/blog/tech-center/get-access-falcon-apis/
@@ -35,7 +36,7 @@ rule CrowdStrike_OAuth2_Client_Credentials
 {
     meta:
         description    = "Detects CrowdStrike Falcon OAuth2 Client ID and Secret in config or env files"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://www.tines.com/blog/getting-connected-to-the-crowdstrike-api/"
@@ -68,7 +69,7 @@ rule CrowdStrike_Customer_ID
 {
     meta:
         description    = "Detects CrowdStrike Falcon Customer ID (CID) — used to identify the tenant"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.redcanary.com/docs/create-api-credentials-to-integrate-your-existing-crowdstrike-falcon-environment-with-red-canary"
@@ -92,7 +93,7 @@ rule CrowdStrike_Falcon_Base_URL
 {
     meta:
         description    = "Detects CrowdStrike Falcon API base URLs with credential context — indicates active integration config"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         confidence     = "MEDIUM"
@@ -120,7 +121,7 @@ rule CrowdStrike_FDR_Credentials
 {
     meta:
         description    = "Detects CrowdStrike Falcon Data Replicator (FDR) credentials — grants access to full telemetry stream"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.redcanary.com/docs/create-api-credentials-to-integrate-your-existing-crowdstrike-falcon-environment-with-red-canary"
