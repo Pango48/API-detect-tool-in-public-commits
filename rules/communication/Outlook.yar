@@ -1,6 +1,6 @@
 /*
  * YARA Rules: Outlook / Microsoft Mail Credentials
- *
+ ** Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://learn.microsoft.com/en-us/graph/auth/
@@ -26,8 +26,8 @@ rule Outlook_Microsoft_Graph_Refresh_Token
 {
     meta:
         description    = "Detects Microsoft Graph / Outlook OAuth2 refresh tokens (OAAABAAAAi prefix)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://learn.microsoft.com/en-us/graph/auth-v2-user"
         confidence     = "HIGH"
@@ -52,8 +52,8 @@ rule Outlook_SMTP_Credentials
 {
     meta:
         description    = "Detects Outlook/Office365 SMTP credentials in config files"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "MEDIUM"
         false_positive = "MEDIUM"
@@ -78,8 +78,8 @@ rule Microsoft_Graph_Mail_Scope_Token
 {
     meta:
         description    = "Detects Microsoft Graph API access tokens with mail scope in Authorization headers or config"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "MEDIUM"
         false_positive = "MEDIUM"
