@@ -1,7 +1,7 @@
 /*
  * YARA Rules: Anthropic Claude API Credentials
  *
- * Author      : yara-apikey-rules contributors
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://docs.anthropic.com/en/api/getting-started
@@ -36,8 +36,8 @@ rule Anthropic_Claude_API_Key
 {
     meta:
         description    = "Detects Anthropic Claude standard API keys (sk-ant-api03- prefix)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.anthropic.com/en/api/getting-started"
         confidence     = "HIGH"
@@ -61,8 +61,8 @@ rule Anthropic_Claude_OAuth_Token
 {
     meta:
         description    = "Detects Anthropic Claude OAuth Access Tokens (sk-ant-oat01- prefix, used by Claude Code / Max/Pro)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://github.com/anthropics/claude-code/issues/18340"
         confidence     = "HIGH"
@@ -83,8 +83,8 @@ rule Anthropic_API_Key_In_Config
 {
     meta:
         description    = "Detects Anthropic API keys in config files, env files, or source code via variable name anchors"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         confidence     = "HIGH"
         false_positive = "LOW"
@@ -117,8 +117,8 @@ rule Anthropic_API_Key_Base64_Anchor
 {
     meta:
         description    = "Detects base64-encoded Anthropic key prefix (c2stYW50LQ== = 'sk-ant-') in binaries or malware"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://www.sentinelone.com/labs/malicious-actors-use-of-openai-keys/"
         confidence     = "MEDIUM"
