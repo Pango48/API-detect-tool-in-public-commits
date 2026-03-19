@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Tenable Nessus / Tenable.io / Tenable.sc API Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://developer.tenable.com/docs/authorization
@@ -37,7 +38,7 @@ rule Tenable_API_Keys_Header
 {
     meta:
         description    = "Detects Tenable Nessus/Tenable.io X-ApiKeys header with accessKey+secretKey pair"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developer.tenable.com/docs/authorization"
@@ -65,7 +66,7 @@ rule Tenable_API_Keys_In_Config
 {
     meta:
         description    = "Detects Tenable accessKey and secretKey in config files, env files, or source code"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developer.tenable.com/docs/authorization"
@@ -107,7 +108,7 @@ rule Nessus_Session_Token
 {
     meta:
         description    = "Detects Nessus self-hosted session tokens in X-Cookie headers or config"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developer.tenable.com/reference/session-create"
@@ -133,7 +134,7 @@ rule Tenable_SC_API_Key
 {
     meta:
         description    = "Detects Tenable.sc (SecurityCenter) API key in config or HTTP headers"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://docs.tenable.com/security-center/Content/RESTAPI.htm"
