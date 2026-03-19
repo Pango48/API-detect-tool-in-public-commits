@@ -29,7 +29,7 @@ rule Stripe_Secret_Key
 {
     meta:
         description    = "Detects Stripe Secret API keys for live and test environments"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://stripe.com/docs/keys"
@@ -54,7 +54,7 @@ rule Stripe_Restricted_Key
 {
     meta:
         description    = "Detects Stripe Restricted API keys (scoped API keys) for live and test environments"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://stripe.com/docs/keys#limit-access"
@@ -79,7 +79,7 @@ rule Stripe_Publishable_Key
 {
     meta:
         description    = "Detects Stripe Publishable keys — low severity alone but signals Stripe usage and may co-occur with secret keys"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://stripe.com/docs/keys"
@@ -104,7 +104,7 @@ rule Stripe_Webhook_Signing_Secret
 {
     meta:
         description    = "Detects Stripe Webhook endpoint signing secrets (whsec_) — allows forging verified webhook events"
-        author         = ""
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://stripe.com/docs/webhooks/signatures"
@@ -126,7 +126,7 @@ rule Stripe_Connect_OAuth_Secret
 {
     meta:
         description    = "Detects Stripe Connect OAuth client secrets and account identifiers used in platform integrations"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://stripe.com/docs/connect/oauth-reference"
