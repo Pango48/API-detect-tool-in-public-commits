@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Gmail Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://developers.google.com/identity/protocols/oauth2
@@ -24,8 +25,8 @@ rule Gmail_OAuth2_Access_Token
 {
     meta:
         description    = "Detects Google/Gmail OAuth2 access tokens (ya29. prefix)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developers.google.com/identity/protocols/oauth2"
         confidence     = "HIGH"
@@ -46,8 +47,8 @@ rule Gmail_OAuth2_Credentials_File
 {
     meta:
         description    = "Detects Gmail OAuth2 credentials JSON with mail scope indicators"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://developers.google.com/gmail/api/auth/about-auth"
         confidence     = "HIGH"
@@ -76,8 +77,8 @@ rule Gmail_App_Password
 {
     meta:
         description    = "Detects Gmail App Passwords (16-char codes for 2FA accounts) in SMTP config files"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://support.google.com/accounts/answer/185833"
         confidence     = "MEDIUM"
