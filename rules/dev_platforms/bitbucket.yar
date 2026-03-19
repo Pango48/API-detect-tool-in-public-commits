@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Bitbucket Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/
@@ -26,7 +27,7 @@ rule Bitbucket_App_Password
 {
     meta:
         description    = "Detects Bitbucket App Passwords used for API authentication and git-over-HTTPS operations"
-        author         = "yara-apikey-rules"
+        author         = BERTON Jules - MORETTI Enzo
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/"
@@ -55,7 +56,7 @@ rule Bitbucket_OAuth_Consumer_Secret
 {
     meta:
         description    = "Detects Bitbucket OAuth 2.0 consumer key/secret pairs in config files or source code"
-        author         = "yara-apikey-rules"
+        author         = BERTON Jules - MORETTI Enzo
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/"
@@ -82,7 +83,7 @@ rule Bitbucket_Repository_Access_Token
 {
     meta:
         description    = "Detects Bitbucket Repository Access Tokens (BRAT — ATBB prefix) scoped to a single repository"
-        author         = "yara-apikey-rules"
+        author         = BERTON Jules - MORETTI Enzo
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://support.atlassian.com/bitbucket-cloud/docs/repository-access-tokens/"
@@ -107,7 +108,7 @@ rule Bitbucket_Pipelines_Hardcoded_Secret
 {
     meta:
         description    = "Detects hardcoded secrets in Bitbucket Pipelines YAML configuration (bitbucket-pipelines.yml)"
-        author         = "yara-apikey-rules"
+        author         = BERTON Jules - MORETTI Enzo
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/"
