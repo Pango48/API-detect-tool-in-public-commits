@@ -1,7 +1,7 @@
 /*
  * YARA Rules: Google Gemini API Credentials
  *
- * Author      : yara-apikey-rules contributors
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://ai.google.dev/gemini-api/docs/api-key
@@ -41,8 +41,8 @@ rule Gemini_API_Key_Standard
 {
     meta:
         description    = "Detects Google Gemini / GCP API keys (AIza prefix) — HIGH RISK: may grant Gemini AI access even if created for Maps/Firebase"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://trufflesecurity.com/blog/google-api-keys-werent-secrets-but-then-gemini-changed-the-rules"
         confidence     = "HIGH"
@@ -64,8 +64,8 @@ rule Gemini_API_Key_In_Config
 {
     meta:
         description    = "Detects Gemini API keys in config files and env vars (GEMINI_API_KEY / GOOGLE_API_KEY)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://ai.google.dev/gemini-api/docs/api-key"
         confidence     = "HIGH"
@@ -96,8 +96,8 @@ rule Gemini_API_Endpoint_With_Key
 {
     meta:
         description    = "Detects Gemini API endpoint calls with embedded API key — indicates direct usage context"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://ai.google.dev/gemini-api/docs/api-reference"
         confidence     = "HIGH"
@@ -124,8 +124,8 @@ rule Gemini_Vertex_AI_Service_Account
 {
     meta:
         description    = "Detects Vertex AI / Gemini service account JSON key files (production auth method)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://geminicli.com/docs/get-started/authentication/"
         confidence     = "HIGH"
