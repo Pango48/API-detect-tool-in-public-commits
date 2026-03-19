@@ -1,10 +1,8 @@
 /*
  * YARA Rules: Microsoft Teams Credentials
  *
- * Author      : yara-apikey-rules contributors
- * Date        : 2025-03-03
+ * Date        : 19-03-2026
  * Version     : 1.0
- * License     : MIT
  * Reference   : https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/api-based-secret-service-auth
  *
  * Coverage:
