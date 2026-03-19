@@ -24,7 +24,7 @@ rule GitHub_Personal_Access_Token_Classic
 {
     meta:
         description    = "Detects GitHub classic Personal Access Tokens (40-char hex)"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"
@@ -50,7 +50,7 @@ rule GitHub_Personal_Access_Token_Fine_Grained
 {
     meta:
         description    = "Detects GitHub fine-grained Personal Access Tokens (github_pat_ prefix)"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens"
@@ -72,7 +72,7 @@ rule GitHub_OAuth_And_App_Tokens
 {
     meta:
         description    = "Detects GitHub OAuth app tokens, user-to-server tokens, server-to-server tokens and refresh tokens"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app"
@@ -106,7 +106,7 @@ rule GitHub_App_Private_Key
 {
     meta:
         description    = "Detects GitHub App RSA private keys used to generate installation tokens"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps"
@@ -131,7 +131,7 @@ rule GitHub_Actions_Secret_In_Workflow
 {
     meta:
         description    = "Detects hardcoded secrets inside GitHub Actions workflow YAML files (should use secrets context)"
-        author         = "yara-apikey-rules"
+        author         = "BERTON Jules - MORETTI Enzo"
         date           = "2026-03-19"
         version        = "1.0"
         reference      = "https://docs.github.com/en/actions/security-guides/encrypted-secrets"
