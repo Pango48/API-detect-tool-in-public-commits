@@ -1,6 +1,7 @@
 /*
  * YARA Rules: Microsoft Teams Credentials
  *
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/api-based-secret-service-auth
@@ -26,8 +27,8 @@ rule Teams_Incoming_Webhook_URL
 {
     meta:
         description    = "Detects Microsoft Teams Incoming Webhook URLs"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook"
         confidence     = "HIGH"
@@ -51,8 +52,8 @@ rule Teams_Power_Automate_Webhook_URL
 {
     meta:
         description    = "Detects Microsoft Power Automate / Logic App webhook URLs used as Teams connectors"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://learn.microsoft.com/en-us/power-automate/"
         confidence     = "HIGH"
@@ -76,8 +77,8 @@ rule Teams_Outgoing_Webhook_HMAC_Token
 {
     meta:
         description    = "Detects Microsoft Teams Outgoing Webhook HMAC security tokens"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-outgoing-webhook"
         confidence     = "MEDIUM"
@@ -99,8 +100,8 @@ rule Teams_Graph_API_Bot_Secret
 {
     meta:
         description    = "Detects Microsoft Teams Bot / Graph API application secrets in config files"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/authentication/"
         confidence     = "MEDIUM"
@@ -126,8 +127,8 @@ rule Teams_API_Secret_Service_Auth
 {
     meta:
         description    = "Detects Teams Message Extension API Secret Service Auth credentials (apiSecretRegistrationId + API key)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.1"
         reference      = "https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/api-based-secret-service-auth"
         confidence     = "HIGH"
