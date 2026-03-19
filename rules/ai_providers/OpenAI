@@ -1,7 +1,7 @@
 /*
  * YARA Rules: OpenAI API Credentials
  *
- * Author      : yara-apikey-rules contributors
+ * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
  * Reference   : https://platform.openai.com/docs/api-reference/authentication
@@ -35,8 +35,8 @@ rule OpenAI_API_Key_Modern
 {
     meta:
         description    = "Detects modern OpenAI API keys: project (sk-proj-), service account (sk-svcacct-), admin (sk-admin-)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://github.com/gitleaks/gitleaks/pull/1780"
         confidence     = "HIGH"
@@ -63,8 +63,8 @@ rule OpenAI_API_Key_Legacy
 {
     meta:
         description    = "Detects legacy OpenAI API keys (sk- prefix without sub-type, ~51 chars total)"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://platform.openai.com/docs/api-reference/authentication"
         confidence     = "HIGH"
@@ -86,8 +86,8 @@ rule OpenAI_API_Key_Base64_Anchor
 {
     meta:
         description    = "Detects OpenAI API key base64 anchor (T3BlbkFJ = 'OpenAI') in binaries, malware, or encoded content"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://www.sentinelone.com/labs/malicious-actors-use-of-openai-keys/"
         confidence     = "HIGH"
@@ -109,8 +109,8 @@ rule OpenAI_Organization_ID
 {
     meta:
         description    = "Detects OpenAI Organization IDs (org- prefix) — used in API requests headers"
-        author         = "yara-apikey-rules"
-        date           = "2025-03-03"
+        author         = "BERTON Jules - MORETTI Enzo"
+        date           = "19-03-2026"
         version        = "1.0"
         reference      = "https://platform.openai.com/docs/api-reference/authentication"
         confidence     = "MEDIUM"
