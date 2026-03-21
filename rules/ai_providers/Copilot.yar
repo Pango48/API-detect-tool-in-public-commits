@@ -48,12 +48,18 @@ rule GitHub_Copilot_Token_Env
         tags           = "copilot,github,token,env,ci-cd"
 
     strings:
-        // Primary Copilot CLI env var — overrides all other tokens
-        $cop_token    = /COPILOT_GITHUB_TOKEN\s*=\s*['"]?(?:ghp_|gho_|github_pat_)[A-Za-z0-9_]{30,}['"]?/
+        // Primary Copilot CLI env var — ghp_ prefix
+        $cop_token_ghp    = /COPILOT_GITHUB_TOKEN[ \t]*=[ \t]*['"]?ghp_[A-Za-z0-9_]{30,}['"]?/
+        // Primary Copilot CLI env var — gho_ prefix
+        $cop_token_gho    = /COPILOT_GITHUB_TOKEN[ \t]*=[ \t]*['"]?gho_[A-Za-z0-9_]{30,}['"]?/
+        // Primary Copilot CLI env var — github_pat_ prefix
+        $cop_token_pat    = /COPILOT_GITHUB_TOKEN[ \t]*=[ \t]*['"]?github_pat_[A-Za-z0-9_]{30,}['"]?/
 
         // Fallback env vars used by Copilot CLI
-        $gh_token     = /GH_TOKEN\s*=\s*['"]?(?:ghp_|gho_)[A-Za-z0-9]{36}['"]?/
-        $github_token = /GITHUB_TOKEN\s*=\s*['"]?(?:ghp_|gho_)[A-Za-z0-9]{36}['"]?/
+        $gh_token         = /GH_TOKEN[ \t]*=[ \t]*['"]?ghp_[A-Za-z0-9]{36}['"]?/
+        $gh_token_gho     = /GH_TOKEN[ \t]*=[ \t]*['"]?gho_[A-Za-z0-9]{36}['"]?/
+        $github_token     = /GITHUB_TOKEN[ \t]*=[ \t]*['"]?ghp_[A-Za-z0-9]{36}['"]?/
+        $github_token_gho = /GITHUB_TOKEN[ \t]*=[ \t]*['"]?gho_[A-Za-z0-9]{36}['"]?/
 
     condition:
         any of them
@@ -75,17 +81,35 @@ rule GitHub_Copilot_OAuth_Config_File
 
     strings:
         // Copilot CLI config file structure
-        $config_key   = "copilot-cli"
+        $config_key     = "copilot-cli"
 
-        // OAuth token fields in config.json
-        $token_field  = /"(?:oauth_token|token|access_token)"\s*:\s*"(?:ghp_|gho_)[A-Za-z0-9]{36}"/
-        $token_field2 = /"(?:oauth_token|token|access_token)"\s*:\s*"github_pat_[A-Za-z0-9_]{82}"/
+        // OAuth token fields — oauth_token key, ghp_ value
+        $tf_oat_ghp     = /"oauth_token"[ \t]*:[ \t]*"ghp_[A-Za-z0-9]{36}"/
+        // OAuth token fields — token key, ghp_ value
+        $tf_tok_ghp     = /"token"[ \t]*:[ \t]*"ghp_[A-Za-z0-9]{36}"/
+        // OAuth token fields — access_token key, ghp_ value
+        $tf_acc_ghp     = /"access_token"[ \t]*:[ \t]*"ghp_[A-Za-z0-9]{36}"/
+
+        // Same three fields with gho_ value
+        $tf_oat_gho     = /"oauth_token"[ \t]*:[ \t]*"gho_[A-Za-z0-9]{36}"/
+        $tf_tok_gho     = /"token"[ \t]*:[ \t]*"gho_[A-Za-z0-9]{36}"/
+        $tf_acc_gho     = /"access_token"[ \t]*:[ \t]*"gho_[A-Za-z0-9]{36}"/
+
+        // Fine-grained PAT variant (github_pat_) — three field names
+        $tf_oat_pat     = /"oauth_token"[ \t]*:[ \t]*"github_pat_[A-Za-z0-9_]{82}"/
+        $tf_tok_pat     = /"token"[ \t]*:[ \t]*"github_pat_[A-Za-z0-9_]{82}"/
+        $tf_acc_pat     = /"access_token"[ \t]*:[ \t]*"github_pat_[A-Za-z0-9_]{82}"/
 
         // GitHub.com host context
-        $host_field   = "\"github.com\""
+        $host_field     = "\"github.com\""
 
     condition:
-        ($config_key or $host_field) and any of ($token_field*)
+        ($config_key or $host_field)
+        and (
+            any of ($tf_oat_*) or
+            any of ($tf_tok_*) or
+            any of ($tf_acc_*)
+        )
 }
 
 
@@ -112,7 +136,7 @@ rule Microsoft_Security_Copilot_Plugin_API_Key
         $skill_group  = "SkillGroups"
 
         // API key stored as plugin secret
-        $api_secret   = /"ApiKey"\s*:\s*"[A-Za-z0-9\-_\.~!@#$%^&*]{10,2048}"/
+        $api_secret   = /"ApiKey"[ \t]*:[ \t]*"[A-Za-z0-9\-_.~!@#$%^&*]{10,2048}"/
 
     condition:
         ($auth_apikey or $auth_apikey2) and ($descriptor or $skill_group or $api_secret)
@@ -170,11 +194,11 @@ rule Chat_Copilot_Backend_Config
         $ai_section     = "\"AIServices\""
 
         // OpenAI key in Chat Copilot config
-        $openai_key     = /"API_KEY"\s*:\s*"sk-[A-Za-z0-9_\-]{20,74}T3BlbkFJ[A-Za-z0-9_\-]{20,74}"/
+        $openai_key     = /"API_KEY"[ \t]*:[ \t]*"sk-[A-Za-z0-9_\-]{20,74}T3BlbkFJ[A-Za-z0-9_\-]{20,74}"/
 
         // Azure OpenAI key in Chat Copilot config
-        $azure_key      = /"API_KEY"\s*:\s*"[0-9a-f]{32}"/
-        $azure_ep       = /"AZURE_OPENAI_ENDPOINT"\s*:\s*"https:\/\/[^"]+\.openai\.azure\.com"/
+        $azure_key      = /"API_KEY"[ \t]*:[ \t]*"[0-9a-f]{32}"/
+        $azure_ep       = /"AZURE_OPENAI_ENDPOINT"[ \t]*:[ \t]*"https:\/\/[^"]+\.openai\.azure\.com"/
 
     condition:
         ($kernel_section or $ai_section) and any of ($openai_key, $azure_key, $azure_ep)
