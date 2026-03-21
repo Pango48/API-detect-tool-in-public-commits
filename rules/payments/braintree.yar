@@ -13,17 +13,6 @@
  *   - Braintree full credential triad (Merchant ID + Public Key + Private Key)
  *   - Braintree Tokenization Keys (client-side, sandbox & production)
  *   - Braintree SDK gateway instantiation with hardcoded credentials
- *
- * Architecture notes:
- *   Braintree (a PayPal subsidiary) uses a tripartite credential model:
- *   Merchant ID + Public Key + Private Key. The private key alone is sufficient
- *   to perform server-side transactions (charges, refunds, vaults) without
- *   additional authentication. Keys are short (~16–32 lowercase hex chars) and
- *   appear in strongly-named configuration fields across multiple SDK languages
- *   (Ruby, Python, PHP, Node.js, Java, .NET).
- *   Tokenization Keys follow a structured format:
- *   <environment>_<8-char-merchant-id>_<16-char-public-key>
- *   and are used for client-side card tokenization.
  */
 
 rule Braintree_Private_Key
@@ -41,15 +30,15 @@ rule Braintree_Private_Key
 
     strings:
         // Environment variable / config file anchor
-        $var1 = /braintree[_\-\.]?private[_\-\.]?key\s*[=:"']{1,3}\s*['"]?[a-f0-9]{32}['"]?/  nocase
-        $var2 = /BRAINTREE[_\.]?PRIVATE[_\.]?KEY\s*=\s*['"]?[a-f0-9]{32}['"]?/  nocase
+        $var1     = /braintree[_\-.]private[_\-.]key[ \t]*[=:"']{1,3}[ \t]*['"]?[a-f0-9]{32}['"]?/ nocase
+        $var2     = /BRAINTREE[_.]PRIVATE[_.]KEY[ \t]*=[ \t]*['"]?[a-f0-9]{32}['"]?/ nocase
 
         // JSON config
-        $json = /"private_key"\s*:\s*"[a-f0-9]{32}"/
+        $json     = /"private_key"[ \t]*:[ \t]*"[a-f0-9]{32}"/
 
         // SDK-specific patterns
-        $sdk_ruby = /:private_key\s*=>\s*['"][a-f0-9]{32}['"]/   // Ruby hash rocket
-        $sdk_py   = /private_key\s*=\s*['"][a-f0-9]{32}['"]/     // Python / generic
+        $sdk_ruby = /:private_key[ \t]*=>[ \t]*['"][a-f0-9]{32}['"]/
+        $sdk_py   = /private_key[ \t]*=[ \t]*['"][a-f0-9]{32}['"]/
 
     condition:
         any of them
@@ -70,18 +59,26 @@ rule Braintree_Full_Credential_Set
         tags           = "braintree,merchant-id,public-key,private-key,payment"
 
     strings:
-        // Merchant ID: 16 lowercase alphanumeric chars
-        $merchant_id = /(?:braintree[_\-\.]?)?merchant[_\-\.]?id\s*[=:"']{1,3}\s*['"]?[a-z0-9]{16}['"]?/  nocase
+        // Merchant ID — with braintree prefix
+        $merchant_bt  = /braintree[_\-.]merchant[_\-.]id[ \t]*[=:"']{1,3}[ \t]*['"]?[a-z0-9]{16}['"]?/ nocase
+        // Merchant ID — without braintree prefix
+        $merchant_id  = /merchant[_\-.]id[ \t]*[=:"']{1,3}[ \t]*['"]?[a-z0-9]{16}['"]?/ nocase
 
-        // Public Key: 16 lowercase alphanumeric chars
-        $public_key  = /(?:braintree[_\-\.]?)?public[_\-\.]?key\s*[=:"']{1,3}\s*['"]?[a-z0-9]{16}['"]?/  nocase
+        // Public Key — with braintree prefix
+        $pubkey_bt    = /braintree[_\-.]public[_\-.]key[ \t]*[=:"']{1,3}[ \t]*['"]?[a-z0-9]{16}['"]?/ nocase
+        // Public Key — without braintree prefix
+        $public_key   = /public[_\-.]key[ \t]*[=:"']{1,3}[ \t]*['"]?[a-z0-9]{16}['"]?/ nocase
 
-        // Private Key: 32 lowercase hex chars
-        $private_key = /(?:braintree[_\-\.]?)?private[_\-\.]?key\s*[=:"']{1,3}\s*['"]?[a-f0-9]{32}['"]?/  nocase
+        // Private Key — with braintree prefix
+        $privkey_bt   = /braintree[_\-.]private[_\-.]key[ \t]*[=:"']{1,3}[ \t]*['"]?[a-f0-9]{32}['"]?/ nocase
+        // Private Key — without braintree prefix
+        $private_key  = /private[_\-.]key[ \t]*[=:"']{1,3}[ \t]*['"]?[a-f0-9]{32}['"]?/ nocase
 
     condition:
-        // All three credentials present in the same file
-        $merchant_id and $public_key and $private_key
+        // All three credential types present in the same file
+        ($merchant_bt or $merchant_id)
+        and ($pubkey_bt or $public_key)
+        and ($privkey_bt or $private_key)
 }
 
 
@@ -105,8 +102,8 @@ rule Braintree_Tokenization_Key
         // Production tokenization key: production_<8-char>_<16-char>
         $tok_production = /production_[a-z0-9]{8}_[a-z0-9]{16}/
 
-        // Config variable anchor (without value — catches any assignment)
-        $ctx = /braintree[_\-\.]?tokenization[_\-\.]?key\s*[=:"']{1,3}/  nocase
+        // Config variable anchor
+        $ctx = /braintree[_\-.]tokenization[_\-.]key[ \t]*[=:"']{1,3}/ nocase
 
     condition:
         $tok_sandbox or $tok_production or $ctx
@@ -128,14 +125,15 @@ rule Braintree_SDK_Gateway_With_Credentials
 
     strings:
         // SDK gateway constructor patterns (multi-language)
-        $rb_gateway  = /Braintree::Gateway\.new\s*\(/                    // Ruby
-        $py_gateway  = /braintree\.Configuration\.configure\s*\(/        // Python
-        $php_gateway = /new\s+Braintree\\Gateway\s*\(/                   // PHP
-        $js_gateway  = /new\s+braintree\.BraintreeGateway\s*\(/          // Node.js
-        $java_gate   = /new\s+BraintreeGateway\s*\(/                     // Java / .NET
+        $rb_gateway  = /Braintree::Gateway\.new[ \t]*\(/
+        $py_gateway  = /braintree\.Configuration\.configure[ \t]*\(/
+        $php_gateway = /new[ \t]+Braintree\\Gateway[ \t]*\(/
+        $js_gateway  = /new[ \t]+braintree\.BraintreeGateway[ \t]*\(/
+        $java_gate   = /new[ \t]+BraintreeGateway[ \t]*\(/
 
-        // Inline private key value (32-char hex) co-located with a gateway call
-        $priv_key = /['"]\s*[a-f0-9]{32}\s*['"]/
+        // Inline private key value — anchored to avoid slow wildcard scan
+        // 32-char lowercase hex string preceded by a quote
+        $priv_key = /['"][a-f0-9]{32}['"]/
 
     condition:
         any of ($rb_gateway, $py_gateway, $php_gateway, $js_gateway, $java_gate) and $priv_key
