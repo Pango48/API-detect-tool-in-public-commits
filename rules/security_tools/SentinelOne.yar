@@ -4,7 +4,6 @@
  * Author      : BERTON Jules - MORETTI Enzo
  * Date        : 19-03-2026
  * Version     : 1.0
- * License     : MIT
  * Reference   : https://usea1-partners.sentinelone.net/api-doc/
  *               https://www.ninjaone.com/docs/integrations/antivirus/sentinelone/
  *
@@ -13,25 +12,6 @@
  *   - SentinelOne API token + management URL pairs
  *   - SentinelOne Singularity Data Lake (XDR) Visibility Enhanced Key
  *   - Service User token in config/env files
- *
- * Token format:
- *   SentinelOne API tokens are opaque strings generated in the Management Console.
- *   They do NOT have a fixed prefix but are always used in combination with a
- *   tenant-specific URL (e.g. usea1-partners.sentinelone.net).
- *   Token length: typically 150-200 Base64-like chars.
- *   One token per user. Expiration: 30 days (renewable).
- *
- *   The most reliable detection anchors are:
- *     1. The *.sentinelone.net domain in proximity to a long token
- *     2. Variable names like SENTINELONE_API_TOKEN, S1_API_TOKEN
- *     3. The Authorization: ApiToken <token> header (SentinelOne-specific header)
- *
- * Threat context:
- *   A leaked SentinelOne API token grants an attacker full EDR control:
- *   - Disable agent protection on any endpoint
- *   - Exclude processes from scanning (enabling malware execution)
- *   - Retrieve threat intelligence and detection data
- *   - Manage groups, sites, and accounts
  */
 
 rule SentinelOne_API_Token_In_Header
@@ -48,11 +28,11 @@ rule SentinelOne_API_Token_In_Header
         tags           = "sentinelone,edr,api-token,authorization-header"
 
     strings:
-        // SentinelOne uses "ApiToken" scheme — not "Bearer" — this is highly distinctive
-        $apitoken_hdr = /Authorization:\s*ApiToken\s+[A-Za-z0-9+\/=]{50,}/  nocase
+        // SentinelOne uses "ApiToken" scheme — not "Bearer" — highly distinctive
+        $apitoken_hdr = /Authorization:[ \t]*ApiToken[ \t]+[A-Za-z0-9+\/=]{50,}/ nocase
 
         // Also seen in curl -H form
-        $curl_hdr     = /-H\s+['"]Authorization:\s*ApiToken\s+[A-Za-z0-9+\/=]{50,}['"]/  nocase
+        $curl_hdr     = /-H[ \t]+['"]Authorization:[ \t]*ApiToken[ \t]+[A-Za-z0-9+\/=]{50,}['"]/ nocase
 
     condition:
         any of them
@@ -73,16 +53,24 @@ rule SentinelOne_API_Token_In_Config
         tags           = "sentinelone,edr,api-token,config,env"
 
     strings:
-        // Environment variable anchors
-        $env1       = /S1[_\.]?API[_\.]?TOKEN\s*=\s*['"]?[A-Za-z0-9+\/=]{50,}['"]?/  nocase
-        $env2       = /SENTINELONE[_\.]?(?:API[_\.]?)?TOKEN\s*=\s*['"]?[A-Za-z0-9+\/=]{50,}['"]?/  nocase
-        $env3       = /SENTINELONE[_\.]?API[_\.]?KEY\s*=\s*['"]?[A-Za-z0-9+\/=]{50,}['"]?/  nocase
+        // S1_API_TOKEN
+        $env1         = /S1[_.]API[_.]TOKEN[ \t]*=[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
 
-        // JSON/YAML config with management URL context
-        $json1      = /"(?:api[_\-]?token|apiToken)"\s*:\s*"[A-Za-z0-9+\/=]{50,}"/
+        // SENTINELONE_API_TOKEN — with API infix
+        $env2a        = /SENTINELONE[_.]API[_.]TOKEN[ \t]*=[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
+        // SENTINELONE_TOKEN — without API infix
+        $env2b        = /SENTINELONE[_.]TOKEN[ \t]*=[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
 
-        // Python SDK / automation scripts
-        $sdk_py     = /SentinelOneSDK\s*\(.*token\s*=\s*['"][A-Za-z0-9+\/=]{50,}['"]/  nocase
+        // SENTINELONE_API_KEY
+        $env3         = /SENTINELONE[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
+
+        // JSON/YAML config — api_token key
+        $json1a       = /"api[_\-]token"[ \t]*:[ \t]*"[A-Za-z0-9+\/=]{50,}"/
+        // JSON/YAML config — apiToken key
+        $json1b       = /"apiToken"[ \t]*:[ \t]*"[A-Za-z0-9+\/=]{50,}"/
+
+        // Python SDK
+        $sdk_py       = /SentinelOneSDK[ \t]*\(.*token[ \t]*=[ \t]*['"][A-Za-z0-9+\/=]{50,}['"]/ nocase
 
     condition:
         any of them
@@ -103,14 +91,20 @@ rule SentinelOne_Credentials_Pair
         tags           = "sentinelone,edr,api-token,management-url,credential-pair"
 
     strings:
-        // SentinelOne management console URL pattern
-        $mgmt_url   = /https?:\/\/[a-zA-Z0-9\-]+\.sentinelone\.net/
+        // SentinelOne management console URL
+        $mgmt_url      = /https?:\/\/[a-zA-Z0-9\-]+\.sentinelone\.net/
 
-        // Token variable nearby (more relaxed — catches any substantial token)
-        $token_var  = /(?:api[_\-]?token|apiToken|token|api[_\-]?key)\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9+\/=]{50,}['"]?/  nocase
+        // Token variable — api_token key
+        $token_var_at  = /api[_\-]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
+        // Token variable — apiToken key
+        $token_var_aT  = /apiToken[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
+        // Token variable — token key
+        $token_var_t   = /token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
+        // Token variable — api_key key
+        $token_var_ak  = /api[_\-]key[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
 
     condition:
-        $mgmt_url and $token_var
+        $mgmt_url and ($token_var_at or $token_var_aT or $token_var_t or $token_var_ak)
 }
 
 
@@ -129,12 +123,16 @@ rule SentinelOne_XDR_Visibility_Key
 
     strings:
         // XDR endpoint anchor
-        $xdr_url    = /https?:\/\/xdr\.[a-z0-9]+\.sentinelone\.net/
+        $xdr_url      = /https?:\/\/xdr\.[a-z0-9]+\.sentinelone\.net/
 
-        // Visibility Enhanced Key variable names
-        $vek_var1   = /VISIBILITY[_\.]?(?:ENHANCED[_\.]?)?KEY\s*=\s*['"]?[A-Za-z0-9+\/=]{50,}['"]?/  nocase
-        $vek_var2   = /S1[_\.]?VEK\s*=\s*['"]?[A-Za-z0-9+\/=]{50,}['"]?/  nocase
+        // VISIBILITY_ENHANCED_KEY — with ENHANCED infix
+        $vek_var1a    = /VISIBILITY[_.]ENHANCED[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
+        // VISIBILITY_KEY — without ENHANCED infix
+        $vek_var1b    = /VISIBILITY[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
+
+        // S1_VEK
+        $vek_var2     = /S1[_.]VEK[ \t]*=[ \t]*['"]?[A-Za-z0-9+\/=]{50,}['"]?/ nocase
 
     condition:
-        $xdr_url or any of ($vek_var*)
+        $xdr_url or $vek_var1a or $vek_var1b or $vek_var2
 }
