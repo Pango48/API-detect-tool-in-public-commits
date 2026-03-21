@@ -2,13 +2,6 @@
 
 > A collection of YARA rules to detect leaked API keys, tokens, and credentials in public git commits.
 
-!\[YARA](https://img.shields.io/badge/YARA-rules-blue?style=flat-square)
-!\[License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
-!\[Coverage](https://img.shields.io/badge/platforms-6-orange?style=flat-square)
-!\[PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)
-
-\---
-
 ## Overview
 
 **API-detect-tool-in-public-commits** is an open-source set of YARA rules designed to detect exposed API keys, secrets, tokens, and credentials in public git repositories and commits.
