@@ -40,12 +40,11 @@ rule Twitter_X_Bearer_Token
 
     strings:
         // Bearer token pattern — always starts with many 'A's (base64 of null bytes)
-        // Followed by URL-encoded or raw characters, total length 80-120 chars
         $bearer = /AAAAAAAAAAAAAAAAAAAAAA[A-Za-z0-9%+\/=_\-]{50,}/
 
         // Common variable name anchors
-        $var1   = /bearer[_\.]?token\s*[=:"']{1,3}\s*['"]?AAAAAAAAAAAAAAA/  nocase
-        $var2   = /TWITTER[_\.]?BEARER[_\.]?TOKEN\s*=\s*['"]?AAAAAAAAAAAAAAA/
+        $var1   = /bearer[_.]?token[ \t]*[=:"']{1,3}[ \t]*['"]?AAAAAAAAAAAAAAA/ nocase
+        $var2   = /TWITTER[_.]BEARER[_.]TOKEN[ \t]*=[ \t]*['"]?AAAAAAAAAAAAAAA/
 
     condition:
         $bearer or any of ($var*)
@@ -66,13 +65,23 @@ rule Twitter_X_API_Consumer_Keys
         tags           = "twitter,x,oauth1,consumer-key,api-key"
 
     strings:
-        // Consumer Key / API Key (25 alphanumeric chars)
-        $api_key1   = /(?:TWITTER|X)[_\.]?(?:API|CONSUMER)[_\.]?KEY\s*=\s*['"]?[A-Za-z0-9]{25}['"]?/  nocase
-        $api_key2   = /consumer[_\.]?key\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9]{25}['"]?/  nocase
+        // Consumer Key / API Key — TWITTER variant
+        $api_key1a  = /TWITTER[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9]{25}['"]?/ nocase
+        $api_key1b  = /TWITTER[_.]CONSUMER[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9]{25}['"]?/ nocase
+        // Consumer Key / API Key — X variant
+        $api_key1c  = /X[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9]{25}['"]?/ nocase
+        $api_key1d  = /X[_.]CONSUMER[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9]{25}['"]?/ nocase
+        // Generic config pattern
+        $api_key2   = /consumer[_.]key[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9]{25}['"]?/ nocase
 
-        // Consumer Secret / API Secret Key (~50 alphanumeric chars)
-        $api_sec1   = /(?:TWITTER|X)[_\.]?(?:API|CONSUMER)[_\.]?SECRET\s*=\s*['"]?[A-Za-z0-9]{50}['"]?/  nocase
-        $api_sec2   = /consumer[_\.]?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9]{50}['"]?/  nocase
+        // Consumer Secret / API Secret — TWITTER variant
+        $api_sec1a  = /TWITTER[_.]API[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9]{50}['"]?/ nocase
+        $api_sec1b  = /TWITTER[_.]CONSUMER[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9]{50}['"]?/ nocase
+        // Consumer Secret / API Secret — X variant
+        $api_sec1c  = /X[_.]API[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9]{50}['"]?/ nocase
+        $api_sec1d  = /X[_.]CONSUMER[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9]{50}['"]?/ nocase
+        // Generic config pattern
+        $api_sec2   = /consumer[_.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9]{50}['"]?/ nocase
 
     condition:
         any of them
@@ -93,13 +102,19 @@ rule Twitter_X_Access_Token
         tags           = "twitter,x,oauth1,access-token"
 
     strings:
-        // Access token has format: <numeric_user_id>-<alphanumeric_string>
-        $acc_tok1   = /(?:TWITTER|X)[_\.]?ACCESS[_\.]?TOKEN\s*=\s*['"]?[0-9]+-[A-Za-z0-9]{30,}['"]?/  nocase
-        $acc_tok2   = /access[_\.]?token\s*[=:"']{1,3}\s*['"]?[0-9]{6,}-[A-Za-z0-9]{30,}['"]?/  nocase
+        // Access token — TWITTER variant
+        $acc_tok1a  = /TWITTER[_.]ACCESS[_.]TOKEN[ \t]*=[ \t]*['"]?[0-9]+-[A-Za-z0-9]{30,}['"]?/ nocase
+        // Access token — X variant
+        $acc_tok1b  = /X[_.]ACCESS[_.]TOKEN[ \t]*=[ \t]*['"]?[0-9]+-[A-Za-z0-9]{30,}['"]?/ nocase
+        // Generic config pattern
+        $acc_tok2   = /access[_.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[0-9]{6,}-[A-Za-z0-9]{30,}['"]?/ nocase
 
-        // Access Token Secret (~45 chars alphanumeric)
-        $acc_sec1   = /(?:TWITTER|X)[_\.]?ACCESS[_\.]?TOKEN[_\.]?SECRET\s*=\s*['"]?[A-Za-z0-9]{45}['"]?/  nocase
-        $acc_sec2   = /access[_\.]?token[_\.]?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9]{45}['"]?/  nocase
+        // Access Token Secret — TWITTER variant
+        $acc_sec1a  = /TWITTER[_.]ACCESS[_.]TOKEN[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9]{45}['"]?/ nocase
+        // Access Token Secret — X variant
+        $acc_sec1b  = /X[_.]ACCESS[_.]TOKEN[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9]{45}['"]?/ nocase
+        // Generic config pattern
+        $acc_sec2   = /access[_.]token[_.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9]{45}['"]?/ nocase
 
     condition:
         any of them
