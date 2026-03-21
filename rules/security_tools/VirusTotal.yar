@@ -15,20 +15,13 @@
  * Key format:
  *   VirusTotal API keys are 64-character lowercase hexadecimal strings.
  *   They are passed via the HTTP header "x-apikey" or as a query param "apikey".
- *   Example from official Tenable/CrowdStrike integration docs:
- *     2c935f507d0686382bb383e4daf92eef8b4a349b9b9de2bf85343c0f7e7265db
  *
  * Threat context:
  *   VT API keys are extremely valuable for threat actors:
  *   - Free keys: 4 lookups/min, 500/day (useful for bulk IOC checking)
  *   - Premium/Enterprise keys: unlimited lookups, retrohunt, livehunt access
  *   - VT Intelligence keys grant access to malware download and YARA retro-hunting
- *     (SentinelOne used VT retro-hunt to find 6000+ Anthropic/OpenAI keys)
  *   - Leaked premium keys are actively traded on underground forums
- *
- * False positive guidance:
- *   64-char hex strings appear in many contexts (MD5 pairs, SHA-256 truncated, etc.).
- *   Always require a variable name anchor or header context for high confidence.
  */
 
 rule VirusTotal_API_Key_In_Header
@@ -45,9 +38,9 @@ rule VirusTotal_API_Key_In_Header
         tags           = "virustotal,api-key,http-header,threat-intel"
 
     strings:
-        // Standard VT API v3 header — documented in official VT curl examples
-        $header1    = /x-apikey\s*:\s*[0-9a-f]{64}/  nocase
-        $header2    = /X-Apikey:\s*[0-9a-f]{64}/
+        // Standard VT API v3 header
+        $header1    = /x-apikey[ \t]*:[ \t]*[0-9a-f]{64}/ nocase
+        $header2    = /X-Apikey:[ \t]*[0-9a-f]{64}/
 
         // URL query parameter form (v2 legacy and some integrations)
         $url_param  = /[?&]apikey=[0-9a-f]{64}/
@@ -71,20 +64,30 @@ rule VirusTotal_API_Key_In_Config
         tags           = "virustotal,api-key,config,env"
 
     strings:
-        // Environment variable patterns
-        $env1       = /VT[_\.]?API[_\.]?KEY\s*=\s*['"]?[0-9a-f]{64}['"]?/  nocase
-        $env2       = /VIRUSTOTAL[_\.]?(?:API[_\.]?)?KEY\s*=\s*['"]?[0-9a-f]{64}['"]?/  nocase
+        // VT_API_KEY
+        $env1         = /VT[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
 
-        // JSON/YAML config patterns
-        $json1      = /"(?:vt|virustotal)[_\-]?api[_\-]?key"\s*:\s*"[0-9a-f]{64}"/  nocase
-        $yaml1      = /(?:vt|virustotal)[_\-]?api[_\-]?key\s*:\s*['"]?[0-9a-f]{64}['"]?/  nocase
+        // VIRUSTOTAL_API_KEY — with API infix
+        $env2a        = /VIRUSTOTAL[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // VIRUSTOTAL_KEY — without API infix
+        $env2b        = /VIRUSTOTAL[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+
+        // JSON config — vt_api_key
+        $json1a       = /"vt[_\-]api[_\-]key"[ \t]*:[ \t]*"[0-9a-f]{64}"/ nocase
+        // JSON config — virustotal_api_key
+        $json1b       = /"virustotal[_\-]api[_\-]key"[ \t]*:[ \t]*"[0-9a-f]{64}"/ nocase
+
+        // YAML config — vt_api_key
+        $yaml1a       = /vt[_\-]api[_\-]key[ \t]*:[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // YAML config — virustotal_api_key
+        $yaml1b       = /virustotal[_\-]api[_\-]key[ \t]*:[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
 
         // Python / SDK instantiation
-        $sdk_py     = /vt\.Client\s*\(\s*['"][0-9a-f]{64}['"]\s*\)/
-        $sdk_py2    = /api_key\s*=\s*['"][0-9a-f]{64}['"]/
+        $sdk_py       = /vt\.Client[ \t]*\([ \t]*['"][0-9a-f]{64}['"][ \t]*\)/
+        $sdk_py2      = /api_key[ \t]*=[ \t]*['"][0-9a-f]{64}['"]/
 
         // VirusTotal endpoint anchor with API key
-        $endpoint   = /virustotal\.com[^"'\s]{0,50}[?&]apikey=[0-9a-f]{64}/
+        $endpoint     = /virustotal\.com[^"'\s]{0,50}[?&]apikey=[0-9a-f]{64}/
 
     condition:
         any of them
