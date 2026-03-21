@@ -13,25 +13,6 @@
  *   - X-ApiKeys HTTP header (canonical Tenable auth header)
  *   - Nessus session token (X-Cookie: token=...)
  *   - Tenable.sc (SecurityCenter) API key
- *
- * Key format (from official Tenable developer docs):
- *   Both accessKey and secretKey are 64-character lowercase hexadecimal strings.
- *   They are ALWAYS passed together in a single header:
- *     X-ApiKeys: accessKey=<64hex>; secretKey=<64hex>
- *
- *   Example from official Tenable documentation:
- *     X-ApiKeys: accessKey=2c935f507d0686382bb383e4daf92eef8b4a349b9b9de2bf85343c0f7e7265db;
- *                secretKey=0553ac5757e8e741d6ef034dc06618106e7855887428e662adcde8862d017cf9
- *
- *   Nessus (self-hosted) additionally supports session token auth via:
- *     X-Cookie: token=<session_token>
- *
- * Threat context:
- *   A leaked Tenable API key pair grants full control over vulnerability scan data:
- *   - Access to all scan results and vulnerability findings for the organization
- *   - Ability to create/modify/delete scans and scan policies
- *   - Access to asset inventory and credential data
- *   - On Tenable.io: access to cloud connector credentials stored in the platform
  */
 
 rule Tenable_API_Keys_Header
@@ -48,14 +29,14 @@ rule Tenable_API_Keys_Header
         tags           = "tenable,nessus,api-key,x-apikeys,header"
 
     strings:
-        // Full X-ApiKeys header with both key pair — from official Tenable curl examples
-        $header_full  = /X-ApiKeys\s*:\s*accessKey=[0-9a-f]{64}\s*;\s*secretKey=[0-9a-f]{64}/  nocase
+        // Full X-ApiKeys header with both key pair
+        $header_full  = /X-ApiKeys[ \t]*:[ \t]*accessKey=[0-9a-f]{64}[ \t]*;[ \t]*secretKey=[0-9a-f]{64}/ nocase
 
         // Partial match — just the header name with an accessKey
-        $header_part  = /X-ApiKeys\s*:\s*accessKey=[0-9a-f]{64}/  nocase
+        $header_part  = /X-ApiKeys[ \t]*:[ \t]*accessKey=[0-9a-f]{64}/ nocase
 
         // Python requests / integration scripts format
-        $py_header    = /'X-ApiKeys'\s*:\s*f?['"]accessKey=[0-9a-f]{64}\s*;\s*secretKey=[0-9a-f]{64}['"]/
+        $py_header    = /'X-ApiKeys'[ \t]*:[ \t]*f?['"]accessKey=[0-9a-f]{64}[ \t]*;[ \t]*secretKey=[0-9a-f]{64}['"]/
 
     condition:
         any of them
@@ -76,31 +57,39 @@ rule Tenable_API_Keys_In_Config
         tags           = "tenable,nessus,api-key,config,env"
 
     strings:
-        // Access key variable patterns
-        $access_env   = /(?:TENABLE|NESSUS)[_\.]?ACCESS[_\.]?KEY\s*=\s*['"]?[0-9a-f]{64}['"]?/  nocase
-        $access_var   = /access[_\.]?key\s*=\s*['"][0-9a-f]{64}['"]/  nocase
+        // Access key — TENABLE prefix
+        $access_env_t  = /TENABLE[_.]ACCESS[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // Access key — NESSUS prefix
+        $access_env_n  = /NESSUS[_.]ACCESS[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // Access key — generic variable
+        $access_var    = /access[_.]key[ \t]*=[ \t]*['"][0-9a-f]{64}['"]/ nocase
 
-        // Secret key variable patterns
-        $secret_env   = /(?:TENABLE|NESSUS)[_\.]?SECRET[_\.]?KEY\s*=\s*['"]?[0-9a-f]{64}['"]?/  nocase
-        $secret_var   = /secret[_\.]?key\s*=\s*['"][0-9a-f]{64}['"]/  nocase
+        // Secret key — TENABLE prefix
+        $secret_env_t  = /TENABLE[_.]SECRET[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // Secret key — NESSUS prefix
+        $secret_env_n  = /NESSUS[_.]SECRET[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // Secret key — generic variable
+        $secret_var    = /secret[_.]key[ \t]*=[ \t]*['"][0-9a-f]{64}['"]/ nocase
 
         // JSON config
-        $json_acc     = /"access[Kk]ey"\s*:\s*"[0-9a-f]{64}"/
-        $json_sec     = /"secret[Kk]ey"\s*:\s*"[0-9a-f]{64}"/
+        $json_acc      = /"access[Kk]ey"[ \t]*:[ \t]*"[0-9a-f]{64}"/
+        $json_sec      = /"secret[Kk]ey"[ \t]*:[ \t]*"[0-9a-f]{64}"/
 
-        // Tenable endpoint anchor (confirms Tenable context for generic variable names)
-        $endpoint     = "cloud.tenable.com"
-        $endpoint2    = "localhost:8834"
+        // Tenable endpoint anchors
+        $endpoint      = "cloud.tenable.com"
+        $endpoint2     = "localhost:8834"
 
     condition:
         // High confidence: both keys present
-        (($access_env or $access_var or $json_acc) and ($secret_env or $secret_var or $json_sec))
+        (($access_env_t or $access_env_n or $access_var or $json_acc)
+         and ($secret_env_t or $secret_env_n or $secret_var or $json_sec))
         or
         // Medium confidence: one key + endpoint anchor
-        (($access_env or $secret_env) and ($endpoint or $endpoint2))
+        (($access_env_t or $access_env_n or $secret_env_t or $secret_env_n)
+         and ($endpoint or $endpoint2))
         or
-        // High confidence: explicit Tenable-prefixed env vars
-        $access_env or $secret_env
+        // High confidence: explicit Tenable/Nessus-prefixed env vars
+        $access_env_t or $access_env_n or $secret_env_t or $secret_env_n
 }
 
 
@@ -118,12 +107,9 @@ rule Nessus_Session_Token
         tags           = "tenable,nessus,session-token,x-cookie"
 
     strings:
-        // Nessus session token header
-        $cookie_hdr   = /X-Cookie\s*:\s*token=[A-Za-z0-9]{32,}/  nocase
-
-        // Session token in scripts with Nessus endpoint
-        $nessus_ep    = "localhost:8834"
-        $token_var    = /token\s*=\s*['"][A-Za-z0-9]{32,}['"]/
+        $cookie_hdr  = /X-Cookie[ \t]*:[ \t]*token=[A-Za-z0-9]{32,}/ nocase
+        $nessus_ep   = "localhost:8834"
+        $token_var   = /token[ \t]*=[ \t]*['"][A-Za-z0-9]{32,}['"]/
 
     condition:
         $cookie_hdr or ($nessus_ep and $token_var)
@@ -144,13 +130,17 @@ rule Tenable_SC_API_Key
         tags           = "tenable,securitycenter,sc,api-key"
 
     strings:
-        // Tenable.sc uses X-SecurityCenter header with numeric session ID
-        // and x-apikey for key-based auth
-        $sc_header  = /X-SecurityCenter\s*:\s*[0-9]{1,10}/  nocase
-        $sc_apikey  = /x-apikey\s*:\s*[0-9a-f]{64}/  nocase
+        $sc_header    = /X-SecurityCenter[ \t]*:[ \t]*[0-9]{1,10}/ nocase
+        $sc_apikey    = /x-apikey[ \t]*:[ \t]*[0-9a-f]{64}/ nocase
 
-        // Environment variable
-        $sc_env     = /(?:TENABLE[_\.]?SC|SECURITY[_\.]?CENTER)[_\.]?(?:API[_\.]?)?KEY\s*=\s*['"]?[0-9a-f]{64}['"]?/  nocase
+        // TENABLE_SC_API_KEY — with SC prefix, with API infix
+        $sc_env_t_ak  = /TENABLE[_.]SC[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // TENABLE_SC_KEY — with SC prefix, without API infix
+        $sc_env_t_k   = /TENABLE[_.]SC[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // SECURITY_CENTER_API_KEY — with SECURITY_CENTER prefix, with API infix
+        $sc_env_s_ak  = /SECURITY[_.]CENTER[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
+        // SECURITY_CENTER_KEY — with SECURITY_CENTER prefix, without API infix
+        $sc_env_s_k   = /SECURITY[_.]CENTER[_.]KEY[ \t]*=[ \t]*['"]?[0-9a-f]{64}['"]?/ nocase
 
     condition:
         any of them
