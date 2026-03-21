@@ -93,20 +93,22 @@ rule Anthropic_API_Key_In_Config
 
     strings:
         // Standard environment variable
-        $env1     = /ANTHROPIC_API_KEY\s*=\s*['"]?sk-ant-[A-Za-z0-9_\-]{10,}['"]?/
+        $env1     = /ANTHROPIC_API_KEY[ \t]*=[ \t]*['"]?sk-ant-[A-Za-z0-9_\-]{10,}['"]?/
 
-        // Admin API key (used for organization management endpoints)
-        $env2     = /ANTHROPIC_ADMIN(?:[_\.]?API[_\.]?KEY)?\s*=\s*['"]?sk-ant-[A-Za-z0-9_\-]{10,}['"]?/  nocase
+        // Admin API key — with API_KEY suffix
+        $env2a    = /ANTHROPIC_ADMIN[_.]API[_.]KEY[ \t]*=[ \t]*['"]?sk-ant-[A-Za-z0-9_\-]{10,}['"]?/ nocase
+        // Admin API key — without API_KEY suffix
+        $env2b    = /ANTHROPIC_ADMIN[ \t]*=[ \t]*['"]?sk-ant-[A-Za-z0-9_\-]{10,}['"]?/ nocase
 
         // JSON config (e.g. .claude/settings.json, openclaw.json)
-        $json1    = /"ANTHROPIC_API_KEY"\s*:\s*"sk-ant-[A-Za-z0-9_\-]{10,}"/
+        $json1    = /"ANTHROPIC_API_KEY"[ \t]*:[ \t]*"sk-ant-[A-Za-z0-9_\-]{10,}"/
 
         // x-api-key header in curl/HTTP config
-        $header1  = /x-api-key:\s*sk-ant-[A-Za-z0-9_\-]{10,}/  nocase
+        $header1  = /x-api-key:[ \t]*sk-ant-[A-Za-z0-9_\-]{10,}/ nocase
 
         // Python/JS SDK instantiation patterns
-        $sdk1     = /api_key\s*=\s*['"]sk-ant-api03-[A-Za-z0-9_\-]{10,}['"]/
-        $sdk2     = /apiKey\s*:\s*['"]sk-ant-api03-[A-Za-z0-9_\-]{10,}['"]/
+        $sdk1     = /api_key[ \t]*=[ \t]*['"]sk-ant-api03-[A-Za-z0-9_\-]{10,}['"]/
+        $sdk2     = /apiKey[ \t]*:[ \t]*['"]sk-ant-api03-[A-Za-z0-9_\-]{10,}['"]/
 
     condition:
         any of them
