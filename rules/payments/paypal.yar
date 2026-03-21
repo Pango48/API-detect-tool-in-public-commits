@@ -13,16 +13,6 @@
  *   - PayPal Sandbox credentials
  *   - PayPal Instant Payment Notification (IPN) tokens
  *   - PayPal Webhook IDs
- *
- * Architecture notes:
- *   PayPal REST API credentials are base62 strings of variable length without a
- *   strict prefix, making detection anchor-based (config key names + value patterns).
- *   The Client Secret alone is sufficient to obtain an OAuth 2.0 bearer token granting
- *   full API access including payment initiation, refunds, and subscription management.
- *   Sandbox credentials ending in -sandbox are lower severity individually but are
- *   often reused verbatim in production or reveal the application's payment architecture.
- *   Webhook IDs allow an attacker to bypass event signature verification, enabling
- *   fake payment confirmation injection.
  */
 
 rule PayPal_REST_API_Client_Secret
@@ -39,12 +29,19 @@ rule PayPal_REST_API_Client_Secret
         tags           = "paypal,rest-api,client-secret,payment"
 
     strings:
-        // Env var anchor + long alphanumeric value
-        $secret1 = /paypal[_\-\.]?(?:client[_\-\.]?)?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{30,80}['"]?/  nocase
-        $secret2 = /PAYPAL[_\.]?(?:CLIENT[_\.]?)?SECRET\s*=\s*['"]?[A-Za-z0-9_\-]{30,80}['"]?/  nocase
+        // paypal_client_secret — with client infix
+        $secret1a    = /paypal[_\-.]client[_\-.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
+        // paypal_secret — without client infix
+        $secret1b    = /paypal[_\-.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
+        // PAYPAL_CLIENT_SECRET — with CLIENT infix
+        $secret2a    = /PAYPAL[_.]CLIENT[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
+        // PAYPAL_SECRET — without CLIENT infix
+        $secret2b    = /PAYPAL[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
 
-        // JSON config
-        $json_secret = /"(?:paypal_)?client_secret"\s*:\s*"[A-Za-z0-9_\-]{30,80}"/
+        // JSON config — paypal_client_secret key
+        $json_sec_pp = /"paypal_client_secret"[ \t]*:[ \t]*"[A-Za-z0-9_\-]{30,80}"/
+        // JSON config — client_secret key (generic)
+        $json_sec    = /"client_secret"[ \t]*:[ \t]*"[A-Za-z0-9_\-]{30,80}"/
 
     condition:
         any of them
@@ -65,21 +62,27 @@ rule PayPal_REST_API_Full_Credentials
         tags           = "paypal,rest-api,client-id,client-secret,payment"
 
     strings:
-        // Client ID anchor (50-100 char base62 value)
-        $client_id1 = /paypal[_\-\.]?client[_\-\.]?id\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{50,100}['"]?/  nocase
-        $client_id2 = /PAYPAL[_\.]?CLIENT[_\.]?ID\s*=\s*['"]?[A-Za-z0-9_\-]{50,100}['"]?/  nocase
+        // Client ID anchors
+        $client_id1  = /paypal[_\-.]client[_\-.]id[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{50,100}['"]?/ nocase
+        $client_id2  = /PAYPAL[_.]CLIENT[_.]ID[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{50,100}['"]?/ nocase
 
-        // Client Secret anchor (30-80 char base62 value)
-        $secret1 = /paypal[_\-\.]?(?:client[_\-\.]?)?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{30,80}['"]?/  nocase
-        $secret2 = /PAYPAL[_\.]?(?:CLIENT[_\.]?)?SECRET\s*=\s*['"]?[A-Za-z0-9_\-]{30,80}['"]?/  nocase
+        // Client Secret anchors — with CLIENT infix
+        $secret1a    = /paypal[_\-.]client[_\-.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
+        // Client Secret anchors — without CLIENT infix
+        $secret1b    = /paypal[_\-.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
+        $secret2a    = /PAYPAL[_.]CLIENT[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
+        $secret2b    = /PAYPAL[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
 
-        // JSON pair
-        $json_id     = /"(?:paypal_)?client_id"\s*:\s*"[A-Za-z0-9_\-]{50,100}"/
-        $json_secret = /"(?:paypal_)?client_secret"\s*:\s*"[A-Za-z0-9_\-]{30,80}"/
+        // JSON pair — paypal_ prefixed keys
+        $json_id_pp  = /"paypal_client_id"[ \t]*:[ \t]*"[A-Za-z0-9_\-]{50,100}"/
+        // JSON pair — generic keys
+        $json_id     = /"client_id"[ \t]*:[ \t]*"[A-Za-z0-9_\-]{50,100}"/
+        $json_sec_pp = /"paypal_client_secret"[ \t]*:[ \t]*"[A-Za-z0-9_\-]{30,80}"/
+        $json_sec    = /"client_secret"[ \t]*:[ \t]*"[A-Za-z0-9_\-]{30,80}"/
 
     condition:
-        (($client_id1 or $client_id2) and ($secret1 or $secret2))
-        or ($json_id and $json_secret)
+        (($client_id1 or $client_id2) and ($secret1a or $secret1b or $secret2a or $secret2b))
+        or (($json_id_pp or $json_id) and ($json_sec_pp or $json_sec))
 }
 
 
@@ -97,17 +100,24 @@ rule PayPal_Sandbox_Credentials
         tags           = "paypal,sandbox,credentials,payment"
 
     strings:
-        // Sandbox mode flag
-        $sandbox_mode = /PAYPAL[_\.]?(?:MODE|ENV(?:IRONMENT)?)\s*=\s*['"]?sandbox['"]?/  nocase
+        // Sandbox mode flag — PAYPAL_MODE=sandbox
+        $sandbox_mode_m  = /PAYPAL[_.]MODE[ \t]*=[ \t]*['"]?sandbox['"]?/ nocase
+        // Sandbox env flag — PAYPAL_ENV=sandbox
+        $sandbox_mode_e  = /PAYPAL[_.]ENV[ \t]*=[ \t]*['"]?sandbox['"]?/ nocase
+        // Sandbox environment flag — PAYPAL_ENVIRONMENT=sandbox
+        $sandbox_mode_ev = /PAYPAL[_.]ENVIRONMENT[ \t]*=[ \t]*['"]?sandbox['"]?/ nocase
 
-        // Sandbox API endpoint reference (confirms sandbox context)
-        $sandbox_url  = "https://api-m.sandbox.paypal.com"
+        // Sandbox API endpoint reference
+        $sandbox_url     = "https://api-m.sandbox.paypal.com"
 
-        // Sandbox-specific secret variable
-        $sandbox_secret = /paypal[_\-\.]?sandbox[_\-\.]?(?:client[_\-\.]?)?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{30,80}['"]?/  nocase
+        // Sandbox-specific secret variable — with client infix
+        $sandbox_sec_a   = /paypal[_\-.]sandbox[_\-.]client[_\-.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
+        // Sandbox-specific secret variable — without client infix
+        $sandbox_sec_b   = /paypal[_\-.]sandbox[_\-.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{30,80}['"]?/ nocase
 
     condition:
-        $sandbox_secret or ($sandbox_mode and $sandbox_url)
+        ($sandbox_sec_a or $sandbox_sec_b)
+        or (($sandbox_mode_m or $sandbox_mode_e or $sandbox_mode_ev) and $sandbox_url)
 }
 
 
@@ -126,7 +136,7 @@ rule PayPal_IPN_Token
 
     strings:
         // IPN token anchor
-        $ipn_token = /paypal[_\-\.]?ipn[_\-\.]?token\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9]{20,}['"]?/  nocase
+        $ipn_token = /paypal[_\-.]ipn[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9]{20,}['"]?/ nocase
 
         // IPN verification URL reference alongside a token value
         $ipn_url   = "https://ipnpb.paypal.com/cgi-bin/webscr"
@@ -150,9 +160,9 @@ rule PayPal_Webhook_ID
         tags           = "paypal,webhook,webhook-id,payment"
 
     strings:
-        // Webhook ID: 17 uppercase alphanumeric chars in named config
-        $webhook_id  = /paypal[_\-\.]?webhook[_\-\.]?id\s*[=:"']{1,3}\s*['"]?[A-Z0-9]{17}['"]?/  nocase
-        $json_hook   = /"webhook_id"\s*:\s*"[A-Z0-9]{17}"/
+        // Webhook ID in named config
+        $webhook_id  = /paypal[_\-.]webhook[_\-.]id[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Z0-9]{17}['"]?/ nocase
+        $json_hook   = /"webhook_id"[ \t]*:[ \t]*"[A-Z0-9]{17}"/
 
     condition:
         any of them
