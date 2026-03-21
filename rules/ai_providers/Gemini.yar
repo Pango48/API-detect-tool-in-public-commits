@@ -74,15 +74,17 @@ rule Gemini_API_Key_In_Config
         tags           = "gemini,google,api-key,config,env"
 
     strings:
-        // Gemini CLI and google-generativeai SDK canonical env var
-        $env1     = /GEMINI_API_KEY\s*=\s*['"]?AIza[0-9A-Za-z\-_]{35}['"]?/
-        $env2     = /GOOGLE_API_KEY\s*=\s*['"]?AIza[0-9A-Za-z\-_]{35}['"]?/
+        // Gemini CLI and google-generativeai SDK canonical env vars
+        $env1     = /GEMINI_API_KEY[ \t]*=[ \t]*['"]?AIza[0-9A-Za-z\-_]{35}['"]?/
+        $env2     = /GOOGLE_API_KEY[ \t]*=[ \t]*['"]?AIza[0-9A-Za-z\-_]{35}['"]?/
 
-        // JSON config (e.g. Gemini CLI config, AI Studio exports)
-        $json1    = /"(?:gemini|google)[_\-]?api[_\-]?key"\s*:\s*"AIza[0-9A-Za-z\-_]{35}"/  nocase
+        // JSON config — gemini variant (e.g. "gemini_api_key", "gemini-api-key")
+        $json1a   = /"gemini[_\-]?api[_\-]?key"[ \t]*:[ \t]*"AIza[0-9A-Za-z\-_]{35}"/ nocase
+        // JSON config — google variant (e.g. "google_api_key", "google-api-key")
+        $json1b   = /"google[_\-]?api[_\-]?key"[ \t]*:[ \t]*"AIza[0-9A-Za-z\-_]{35}"/ nocase
 
         // Python SDK (google-generativeai)
-        $sdk_py   = /genai\.configure\s*\(\s*api_key\s*=\s*['"]AIza[0-9A-Za-z\-_]{35}['"]/
+        $sdk_py   = /genai\.configure[ \t]*\([ \t]*api_key[ \t]*=[ \t]*['"]AIza[0-9A-Za-z\-_]{35}['"]/
 
         // query parameter in URL (very common in public JS code)
         $url_key  = /[?&]key=AIza[0-9A-Za-z\-_]{35}/
