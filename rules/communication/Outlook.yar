@@ -22,7 +22,6 @@
  *   smtp.office365.com, smtp.live.com and smtp.hotmail.com are the three
  *   main hostnames to anchor on.
  */
-
 rule Outlook_Microsoft_Graph_Refresh_Token
 {
     meta:
@@ -35,19 +34,18 @@ rule Outlook_Microsoft_Graph_Refresh_Token
         false_positive = "LOW"
         severity       = "CRITICAL"
         tags           = "outlook,microsoft,graph-api,oauth2,refresh-token"
-
     strings:
         // Microsoft Graph refresh tokens start with this prefix (documented in MSFT examples)
-        $refresh_tok  = /OAAABAAAAi[A-Za-z0-9\._\-]{60,}/
-
+        $refresh_tok  = /OAAABAAAAi[A-Za-z0-9._\-]{60,}/
         // Variable name anchors
-        $var1         = /refresh[_\.]?token\s*[=:"']{1,3}\s*['"]?OAAABAAAAi[A-Za-z0-9\._\-]{30,}['"]?/  nocase
-        $var2         = /MICROSOFT[_\.]?(?:GRAPH[_\.]?)?REFRESH[_\.]?TOKEN\s*=\s*['"]?OAAABAAAAi/  nocase
-
+        $var1         = /refresh[_.]?token[ \t]*[=:"']{1,3}[ \t]*['"]?OAAABAAAAi[A-Za-z0-9._\-]{30,}['"]?/ nocase
+        // MICROSOFT_GRAPH_REFRESH_TOKEN=... variant (with GRAPH)
+        $var2a        = /MICROSOFT[_.]GRAPH[_.]REFRESH[_.]TOKEN[ \t]*=[ \t]*['"]?OAAABAAAAi/ nocase
+        // MICROSOFT_REFRESH_TOKEN=... variant (without GRAPH)
+        $var2b        = /MICROSOFT[_.]REFRESH[_.]TOKEN[ \t]*=[ \t]*['"]?OAAABAAAAi/ nocase
     condition:
         $refresh_tok or any of ($var*)
 }
-
 
 rule Outlook_SMTP_Credentials
 {
@@ -60,20 +58,16 @@ rule Outlook_SMTP_Credentials
         false_positive = "MEDIUM"
         severity       = "HIGH"
         tags           = "outlook,office365,smtp,credentials"
-
     strings:
         // SMTP host anchors for Outlook/O365
         $smtp_outlook  = "smtp.office365.com"
         $smtp_live     = "smtp.live.com"
         $smtp_hotmail  = "smtp.hotmail.com"
-
         // Password field nearby
-        $pass_field    = /password\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9!@#$%^&*]{8,}['"]?/  nocase
-
+        $pass_field    = /password[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9!@#$%^&*]{8,}['"]?/ nocase
     condition:
         any of ($smtp_*) and $pass_field
 }
-
 
 rule Microsoft_Graph_Mail_Scope_Token
 {
@@ -86,19 +80,15 @@ rule Microsoft_Graph_Mail_Scope_Token
         false_positive = "MEDIUM"
         severity       = "HIGH"
         tags           = "outlook,microsoft,graph-api,mail,access-token"
-
     strings:
         // Graph API endpoint for mail
         $graph_mail   = "https://graph.microsoft.com/v1.0/me/sendMail"
         $graph_mail2  = "https://graph.microsoft.com/v1.0/users/"
-
         // Scope indicators for mail access
         $scope_mail   = "https://outlook.office.com/Mail.Send"
         $scope_mail2  = "https://graph.microsoft.com/mail.read"
-
         // Client credentials in config
-        $client_sec   = /client[_\.]?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9\.\-_~]{34,42}['"]?/  nocase
-
+        $client_sec   = /client[_.]?secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9.\-_~]{34,42}['"]?/ nocase
     condition:
         ($graph_mail or $graph_mail2) and ($scope_mail or $scope_mail2 or $client_sec)
 }
