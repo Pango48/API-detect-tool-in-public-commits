@@ -13,14 +13,6 @@
  *   - Bitbucket OAuth 2.0 Consumer key/secret pairs
  *   - Bitbucket Repository Access Tokens (BRAT — ATBB prefix)
  *   - Bitbucket Pipelines environment variables (hardcoded secrets)
- *
- * Architecture notes:
- *   Bitbucket App Passwords are the primary authentication mechanism for REST API
- *   calls and git-over-HTTPS operations. They do not follow a strict prefix convention,
- *   making detection anchor-based (config key names + value patterns).
- *   Repository Access Tokens (BRAT, introduced 2022) use the Atlassian ATBB prefix
- *   and are scoped to a single repository — leaking them grants full read/write on
- *   that repo. OAuth consumer secrets allow impersonating the registered app.
  */
 
 rule Bitbucket_App_Password
@@ -37,15 +29,23 @@ rule Bitbucket_App_Password
         tags           = "bitbucket,app-password,token,atlassian"
 
     strings:
-        // Config key anchor + 20-char base62 value
-        $var1 = /bitbucket[_\-\.]?(?:app[_\-\.]?)?password\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9]{20}['"]?/  nocase
-        $var2 = /BITBUCKET[_\.]?(?:APP[_\.]?)?(?:PASSWORD|TOKEN)\s*=\s*['"]?[A-Za-z0-9]{20}['"]?/  nocase
+        // bitbucket_app_password / bitbucket_password (with app infix)
+        $var1a   = /bitbucket[_\-.]app[_\-.]password[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9]{20}['"]?/ nocase
+        // bitbucket_password (without app infix)
+        $var1b   = /bitbucket[_\-.]password[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9]{20}['"]?/ nocase
+
+        // BITBUCKET_APP_PASSWORD / BITBUCKET_APP_TOKEN
+        $var2a   = /BITBUCKET[_.]APP[_.]PASSWORD[ \t]*=[ \t]*['"]?[A-Za-z0-9]{20}['"]?/ nocase
+        $var2b   = /BITBUCKET[_.]APP[_.]TOKEN[ \t]*=[ \t]*['"]?[A-Za-z0-9]{20}['"]?/ nocase
+        // BITBUCKET_PASSWORD / BITBUCKET_TOKEN (without APP infix)
+        $var2c   = /BITBUCKET[_.]PASSWORD[ \t]*=[ \t]*['"]?[A-Za-z0-9]{20}['"]?/ nocase
+        $var2d   = /BITBUCKET[_.]TOKEN[ \t]*=[ \t]*['"]?[A-Za-z0-9]{20}['"]?/ nocase
 
         // Git URL with embedded Bitbucket credentials
         $git_url = /https:\/\/[a-zA-Z0-9_\-\.]+:[A-Za-z0-9]{20}@bitbucket\.org/
 
         // .netrc file entry for Bitbucket
-        $netrc = /machine\s+bitbucket\.org\s+login\s+\S+\s+password\s+[A-Za-z0-9]{20}/
+        $netrc   = /machine[ \t]+bitbucket\.org[ \t]+login[ \t]+\S+[ \t]+password[ \t]+[A-Za-z0-9]{20}/
 
     condition:
         any of them
@@ -66,16 +66,24 @@ rule Bitbucket_OAuth_Consumer_Secret
         tags           = "bitbucket,oauth,consumer-secret,atlassian"
 
     strings:
-        // OAuth consumer secret anchor in env var or config
-        $secret1 = /bitbucket[_\-\.]?oauth[_\-\.]?(?:consumer[_\-\.]?)?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9]{32,64}['"]?/  nocase
-        $secret2 = /BITBUCKET[_\.]?(?:CLIENT|CONSUMER)[_\.]?SECRET\s*=\s*['"]?[A-Za-z0-9]{32,64}['"]?/  nocase
+        // bitbucket_oauth_consumer_secret (with consumer infix)
+        $secret1a    = /bitbucket[_\-.]oauth[_\-.]consumer[_\-.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9]{32,64}['"]?/ nocase
+        // bitbucket_oauth_secret (without consumer infix)
+        $secret1b    = /bitbucket[_\-.]oauth[_\-.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9]{32,64}['"]?/ nocase
+
+        // BITBUCKET_CLIENT_SECRET / BITBUCKET_CONSUMER_SECRET
+        $secret2a    = /BITBUCKET[_.]CLIENT[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9]{32,64}['"]?/ nocase
+        $secret2b    = /BITBUCKET[_.]CONSUMER[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9]{32,64}['"]?/ nocase
 
         // JSON config block with both key and secret
-        $json_key    = /"(?:client|consumer)_key"\s*:\s*"[A-Za-z0-9]{18,22}"/
-        $json_secret = /"(?:client|consumer)_secret"\s*:\s*"[A-Za-z0-9]{32,64}"/
+        $json_key_c  = /"client_key"[ \t]*:[ \t]*"[A-Za-z0-9]{18,22}"/
+        $json_key_co = /"consumer_key"[ \t]*:[ \t]*"[A-Za-z0-9]{18,22}"/
+        $json_sec_c  = /"client_secret"[ \t]*:[ \t]*"[A-Za-z0-9]{32,64}"/
+        $json_sec_co = /"consumer_secret"[ \t]*:[ \t]*"[A-Za-z0-9]{32,64}"/
 
     condition:
-        ($secret1 or $secret2) or ($json_key and $json_secret)
+        ($secret1a or $secret1b or $secret2a or $secret2b)
+        or (($json_key_c or $json_key_co) and ($json_sec_c or $json_sec_co))
 }
 
 
@@ -93,11 +101,17 @@ rule Bitbucket_Repository_Access_Token
         tags           = "bitbucket,repository-access-token,brat,atlassian"
 
     strings:
-        // BRAT: ATBB prefix + 32 alphanumeric chars (Atlassian token format)
-        $brat = /ATBB[A-Za-z0-9]{32}/
+        // BRAT: ATBB prefix + 32 alphanumeric chars
+        $brat         = /ATBB[A-Za-z0-9]{32}/
 
-        // Named variable context containing ATBB token
-        $atbb_var = /(?:BITBUCKET|BB)[_\.]?(?:REPO[_\.]?)?(?:ACCESS[_\.]?)?TOKEN\s*[=:"']{1,3}\s*['"]?ATBB[A-Za-z0-9]{32}['"]?/  nocase
+        // BITBUCKET_REPO_ACCESS_TOKEN / BITBUCKET_ACCESS_TOKEN / BITBUCKET_TOKEN
+        $atbb_var_a   = /BITBUCKET[_.]REPO[_.]ACCESS[_.]TOKEN[ \t]*[=:"']{1,3}[ \t]*['"]?ATBB[A-Za-z0-9]{32}['"]?/ nocase
+        $atbb_var_b   = /BITBUCKET[_.]ACCESS[_.]TOKEN[ \t]*[=:"']{1,3}[ \t]*['"]?ATBB[A-Za-z0-9]{32}['"]?/ nocase
+        $atbb_var_c   = /BITBUCKET[_.]TOKEN[ \t]*[=:"']{1,3}[ \t]*['"]?ATBB[A-Za-z0-9]{32}['"]?/ nocase
+        // BB_ prefix variants
+        $atbb_var_d   = /BB[_.]REPO[_.]ACCESS[_.]TOKEN[ \t]*[=:"']{1,3}[ \t]*['"]?ATBB[A-Za-z0-9]{32}['"]?/ nocase
+        $atbb_var_e   = /BB[_.]ACCESS[_.]TOKEN[ \t]*[=:"']{1,3}[ \t]*['"]?ATBB[A-Za-z0-9]{32}['"]?/ nocase
+        $atbb_var_f   = /BB[_.]TOKEN[ \t]*[=:"']{1,3}[ \t]*['"]?ATBB[A-Za-z0-9]{32}['"]?/ nocase
 
     condition:
         any of them
@@ -121,12 +135,17 @@ rule Bitbucket_Pipelines_Hardcoded_Secret
         // Pipelines YAML file marker
         $pipelines_marker = "bitbucket-pipelines.yml"
 
-        // Hardcoded secret value in a step environment block (not $BITBUCKET_* built-in)
-        $env_secret = /(?:PASSWORD|SECRET|TOKEN|API_KEY|ACCESS_KEY)\s*:\s*['"]?[A-Za-z0-9\+\/]{20,}={0,2}['"]?/  nocase
+        // Hardcoded secret values — split by key name to avoid (?:...) alternation
+        $env_password  = /PASSWORD[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
+        $env_secret    = /SECRET[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
+        $env_token     = /TOKEN[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
+        $env_api_key   = /API_KEY[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
+        $env_access    = /ACCESS_KEY[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
 
         // Bitbucket-specific built-in variable leak (should never be hardcoded)
-        $bb_token = /BITBUCKET_REPO_FULL_NAME\s*[=:]\s*['"]?[A-Za-z0-9\/\-_\.]{5,}['"]?/
+        $bb_token      = /BITBUCKET_REPO_FULL_NAME[ \t]*[=:][ \t]*['"]?[A-Za-z0-9\/\-_.]{5,}['"]?/
 
     condition:
-        $pipelines_marker and ($env_secret or $bb_token)
+        $pipelines_marker and
+        ($env_password or $env_secret or $env_token or $env_api_key or $env_access or $bb_token)
 }
