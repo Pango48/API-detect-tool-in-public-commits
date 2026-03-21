@@ -21,7 +21,6 @@
  *   r"[\w-]{24}\.[\w-]{6}\.[\w-]{27}"
  *   r"mfa\.[\w-]{84}"
  */
-
 rule Discord_Bot_Token
 {
     meta:
@@ -34,18 +33,15 @@ rule Discord_Bot_Token
         false_positive = "LOW"
         severity       = "CRITICAL"
         tags           = "discord,bot-token,credential-leak"
-
     strings:
         // Standard bot token: base64_id.timestamp.hmac
-        $bot_token  = /[\w\-]{24}\.[\w\-]{6}\.[\w\-]{27}/
-
+        // Note: [\w\-]{24} can be slow; consider adding a literal anchor if performance matters
+        $bot_token  = /[A-Za-z0-9_\-]{24}\.[A-Za-z0-9_\-]{6}\.[A-Za-z0-9_\-]{27}/
         // MFA token variant (used in user account takeover malware)
-        $mfa_token  = /mfa\.[\w\-]{84}/
-
+        $mfa_token  = /mfa\.[A-Za-z0-9_\-]{84}/
     condition:
         any of them
 }
-
 
 rule Discord_Webhook_URL
 {
@@ -59,16 +55,20 @@ rule Discord_Webhook_URL
         false_positive = "LOW"
         severity       = "HIGH"
         tags           = "discord,webhook,c2,exfiltration"
-
     strings:
-        // Standard webhook URL — discord.com and discordapp.com variants
-        // Also matches canary and ptb environments
-        $webhook_main  = /https:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api(?:\/v\d+)?\/webhooks\/\d+\/[\w\-]+/
-
+        // Standard webhook URL — discord.com variant
+        $webhook_discord  = /https:\/\/discord\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_\-]+/
+        // discordapp.com variant
+        $webhook_app      = /https:\/\/discordapp\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_\-]+/
+        // Canary environment
+        $webhook_canary   = /https:\/\/canary\.discord\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_\-]+/
+        // PTB (Public Test Build) environment
+        $webhook_ptb      = /https:\/\/ptb\.discord\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_\-]+/
+        // Versioned API (e.g. /api/v10/webhooks/...)
+        $webhook_versioned = /https:\/\/discord\.com\/api\/v[0-9]+\/webhooks\/[0-9]+\/[A-Za-z0-9_\-]+/
     condition:
-        $webhook_main
+        any of them
 }
-
 
 rule Discord_OAuth2_Client_Secret
 {
@@ -81,16 +81,14 @@ rule Discord_OAuth2_Client_Secret
         false_positive = "MEDIUM"
         severity       = "HIGH"
         tags           = "discord,oauth2,client-secret"
-
     strings:
-        // Environment variable or config file patterns
-        $var1 = /DISCORD[_\.]?(?:CLIENT[_\.]?)?SECRET\s*=\s*['"]?[A-Za-z0-9_\-]{32,}['"]?/  nocase
-        $var2 = /discord[_\.]?client[_\.]?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{32,}['"]?/  nocase
-
+        // Environment variable pattern: DISCORD_SECRET=... or DISCORD_CLIENT_SECRET=...
+        $var1 = /DISCORD[_.]CLIENT[_.]SECRET[ \t]*=[ \t]*[A-Za-z0-9_\-]{32,}/ nocase
+        $var2 = /DISCORD[_.]SECRET[ \t]*=[ \t]*[A-Za-z0-9_\-]{32,}/ nocase
+        // YAML / TOML / INI style: discord_client_secret: "..."
+        $var3 = /discord[_.]client[_.]secret[ \t]*:[ \t]*[A-Za-z0-9_\-]{32,}/ nocase
         // JSON config pattern
-        $json = /"client_secret"\s*:\s*"[A-Za-z0-9_\-]{32,}"/
-
+        $json = /"client_secret"[ \t]*:[ \t]*"[A-Za-z0-9_\-]{32,}"/
     condition:
         any of them
 }
-
