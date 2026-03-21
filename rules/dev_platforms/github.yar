@@ -35,11 +35,22 @@ rule GitHub_Personal_Access_Token_Classic
         tags           = "github,token,pat,personal-access-token"
 
     strings:
-        // Classic PAT anchor: variable name context + 40-char hex value
-        $var1 = /(?:github|gh)[_\-\.]?(?:token|pat|access[_\-\.]?token|personal[_\-\.]?access[_\-\.]?token)\s*[=:"']{1,3}\s*['"]?[0-9a-f]{40}['"]?/  nocase
-        $var2 = /GITHUB[_\.]TOKEN\s*=\s*['"]?[0-9a-f]{40}['"]?/  nocase
+        // Classic PAT anchor — github/gh + token
+        $var1a = /github[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[0-9a-f]{40}['"]?/ nocase
+        // github/gh + pat
+        $var1b = /github[_\-.]pat[ \t]*[=:"']{1,3}[ \t]*['"]?[0-9a-f]{40}['"]?/ nocase
+        // github/gh + access_token
+        $var1c = /github[_\-.]access[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[0-9a-f]{40}['"]?/ nocase
+        // github/gh + personal_access_token
+        $var1d = /github[_\-.]personal[_\-.]access[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[0-9a-f]{40}['"]?/ nocase
+        // gh_ prefix variants
+        $var1e = /gh[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[0-9a-f]{40}['"]?/ nocase
+        $var1f = /gh[_\-.]pat[ \t]*[=:"']{1,3}[ \t]*['"]?[0-9a-f]{40}['"]?/ nocase
 
-        // Git credential helper storage (https://user:TOKEN@github.com)
+        // Canonical env var
+        $var2  = /GITHUB[_.]TOKEN[ \t]*=[ \t]*['"]?[0-9a-f]{40}['"]?/ nocase
+
+        // Git credential helper storage
         $git_url = /https:\/\/[a-zA-Z0-9_\-\.]+:[0-9a-f]{40}@github\.com/
 
     condition:
@@ -142,9 +153,18 @@ rule GitHub_Actions_Secret_In_Workflow
         tags           = "github,actions,workflow,secret,ci-cd"
 
     strings:
-        // Hardcoded token value in env: block — not referencing ${{ secrets.X }}
-        $env_token  = /(?:GITHUB_TOKEN|GH_TOKEN|GITHUB_PAT)\s*:\s*['"]?(?!\{\{\s*secrets\.)[A-Za-z0-9_\-\.]{20,}['"]?/
-        $env_secret = /(?:API_KEY|SECRET|PASSWORD|TOKEN)\s*:\s*['"]?[A-Za-z0-9\+\/]{20,}={0,2}['"]?/  nocase
+        // Hardcoded GITHUB_TOKEN value (not referencing secrets context)
+        $env_tok_github = /GITHUB_TOKEN[ \t]*:[ \t]*['"]?[A-Za-z0-9_\-\.]{20,}['"]?/
+        // Hardcoded GH_TOKEN value
+        $env_tok_gh     = /GH_TOKEN[ \t]*:[ \t]*['"]?[A-Za-z0-9_\-\.]{20,}['"]?/
+        // Hardcoded GITHUB_PAT value
+        $env_tok_pat    = /GITHUB_PAT[ \t]*:[ \t]*['"]?[A-Za-z0-9_\-\.]{20,}['"]?/
+
+        // Generic hardcoded secret fields — split by key name
+        $env_api_key    = /API_KEY[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
+        $env_secret     = /SECRET[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
+        $env_password   = /PASSWORD[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
+        $env_token      = /TOKEN[ \t]*:[ \t]*['"]?[A-Za-z0-9+\/]{20,}={0,2}['"]?/ nocase
 
     condition:
         any of them
