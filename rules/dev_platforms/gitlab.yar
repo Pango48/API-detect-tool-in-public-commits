@@ -40,11 +40,21 @@ rule GitLab_Personal_Access_Token
         // Prefixed PAT (GitLab 14.5+): glpat- + 20 alphanumeric chars
         $glpat = /glpat-[A-Za-z0-9_\-]{20}/
 
-        // Legacy un-prefixed PAT in config context
-        $legacy = /(?:gitlab|gl)[_\-\.]?(?:token|pat|access[_\-\.]?token)\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{20}['"]?/  nocase
+        // Legacy un-prefixed PAT — gitlab_ + token
+        $legacy_gl_token   = /gitlab[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
+        // gitlab_ + pat
+        $legacy_gl_pat     = /gitlab[_\-.]pat[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
+        // gitlab_ + access_token
+        $legacy_gl_acc     = /gitlab[_\-.]access[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
+        // gl_ + token
+        $legacy_g_token    = /gl[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
+        // gl_ + pat
+        $legacy_g_pat      = /gl[_\-.]pat[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
+        // gl_ + access_token
+        $legacy_g_acc      = /gl[_\-.]access[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
 
         // Git URL with embedded token
-        $git_url = /https:\/\/(?:oauth2|[a-zA-Z0-9_\-\.]+):[A-Za-z0-9_\-]{20}@gitlab\.com/
+        $git_url = /https:\/\/[a-zA-Z0-9_\-\.]+:[A-Za-z0-9_\-]{20}@gitlab\.com/
 
     condition:
         any of them
@@ -69,7 +79,7 @@ rule GitLab_Deploy_Token
         $gldt = /gldt-[A-Za-z0-9_\-]{20}/
 
         // Config anchor for un-prefixed deploy token
-        $ctx = /gitlab[_\-\.]?deploy[_\-\.]?token\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{20}['"]?/  nocase
+        $ctx = /gitlab[_\-.]deploy[_\-.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
 
     condition:
         any of them
@@ -94,7 +104,7 @@ rule GitLab_CI_Job_Token
         $glcbt = /glcbt-[A-Za-z0-9_\-]{20}/
 
         // Hardcoded CI_JOB_TOKEN value (should be injected by GitLab at runtime)
-        $ci_token = /CI_JOB_TOKEN\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{20}['"]?/  nocase
+        $ci_token = /CI_JOB_TOKEN[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
 
     condition:
         any of them
@@ -160,8 +170,8 @@ rule GitLab_Runner_Registration_Token
 
     strings:
         // Runner registration token anchor in config.toml or CI env
-        $toml_token = /registration[_\-]?token\s*=\s*['"]?[A-Za-z0-9_\-]{20}['"]?/  nocase
-        $env_token  = /GITLAB[_\.]?RUNNER[_\.]?TOKEN\s*=\s*['"]?[A-Za-z0-9_\-]{20}['"]?/  nocase
+        $toml_token = /registration[_\-]?token[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
+        $env_token  = /GITLAB[_.]RUNNER[_.]TOKEN[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{20}['"]?/ nocase
 
         // glrt- prefix = new runner authentication token (GitLab 15.10+)
         $glrt = /glrt-[A-Za-z0-9_\-]{20}/
