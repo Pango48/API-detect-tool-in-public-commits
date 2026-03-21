@@ -20,7 +20,6 @@
  *   for accounts with 2FA enabled. They appear in SMTP config files
  *   alongside smtp.gmail.com.
  */
-
 rule Gmail_OAuth2_Access_Token
 {
     meta:
@@ -33,15 +32,12 @@ rule Gmail_OAuth2_Access_Token
         false_positive = "LOW"
         severity       = "HIGH"
         tags           = "gmail,google,oauth2,access-token"
-
     strings:
         // Google OAuth2 access tokens always start with "ya29."
         $access_token = /ya29\.[A-Za-z0-9_\-]{50,}/
-
     condition:
         $access_token
 }
-
 
 rule Gmail_OAuth2_Credentials_File
 {
@@ -55,23 +51,18 @@ rule Gmail_OAuth2_Credentials_File
         false_positive = "LOW"
         severity       = "CRITICAL"
         tags           = "gmail,google,oauth2,credentials-file"
-
     strings:
         // Gmail scope indicators
         $scope_gmail    = "https://mail.google.com/"
         $scope_gmail2   = "https://www.googleapis.com/auth/gmail"
-
         // Client secrets JSON fields
         $client_id      = /[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com/
-        $client_secret  = /"client_secret"\s*:\s*"[A-Za-z0-9\-_]{24,}"/
-
+        $client_secret  = /"client_secret"[ \t]*:[ \t]*"[A-Za-z0-9\-_]{24,}"/
         // Refresh token stored in credentials
-        $refresh        = /"refresh_token"\s*:\s*"1\/\/[A-Za-z0-9\-_]{40,}"/
-
+        $refresh        = /"refresh_token"[ \t]*:[ \t]*"1\/\/[A-Za-z0-9\-_]{40,}"/
     condition:
         ($scope_gmail or $scope_gmail2) and ($client_id or $client_secret or $refresh)
 }
-
 
 rule Gmail_App_Password
 {
@@ -85,13 +76,15 @@ rule Gmail_App_Password
         false_positive = "MEDIUM"
         severity       = "HIGH"
         tags           = "gmail,google,app-password,smtp"
-
     strings:
         // App password in SMTP config (16 lowercase letters, sometimes with spaces)
         $smtp_host  = /smtp\.gmail\.com/
-        $app_pass1  = /password\s*[=:"']{1,3}\s*['"]?[a-z]{4}\s?[a-z]{4}\s?[a-z]{4}\s?[a-z]{4}['"]?/  nocase
-        $app_pass2  = /GMAIL[_\.]?(?:APP[_\.]?)?PASSWORD\s*=\s*['"]?[a-z]{16}['"]?/  nocase
+        $app_pass1  = /password[ \t]*[=:"']{1,3}[ \t]*['"]?[a-z]{4}[ ]?[a-z]{4}[ ]?[a-z]{4}[ ]?[a-z]{4}['"]?/ nocase
 
+        // GMAIL_APP_PASSWORD=... variant (with APP_PASSWORD)
+        $app_pass2a = /GMAIL[_.]APP[_.]PASSWORD[ \t]*=[ \t]*['"]?[a-z]{16}['"]?/ nocase
+        // GMAIL_PASSWORD=... variant (without APP)
+        $app_pass2b = /GMAIL[_.]PASSWORD[ \t]*=[ \t]*['"]?[a-z]{16}['"]?/ nocase
     condition:
-        $smtp_host and ($app_pass1 or $app_pass2)
+        $smtp_host and ($app_pass1 or $app_pass2a or $app_pass2b)
 }
