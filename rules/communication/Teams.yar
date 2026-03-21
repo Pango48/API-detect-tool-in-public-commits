@@ -87,9 +87,13 @@ rule Teams_Outgoing_Webhook_HMAC_Token
         tags           = "teams,microsoft,hmac,security-token,outgoing-webhook"
 
     strings:
-        // HMAC token anchor patterns — base64 ~44 chars, shown once at creation
-        $var1 = /teams[_\.]?(?:hmac|security|webhook)[_\.]?token\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9+\/]{42,44}={0,2}['"]?/  nocase
-        $var2 = /outgoing[_\.]?webhook[_\.]?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9+\/]{42,44}={0,2}['"]?/  nocase
+        // $var1 — teams_hmac_token / teams_security_token / teams_webhook_token
+        $var1a = /teams[_.]hmac[_.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9+\/]{42,44}={0,2}['"]?/ nocase
+        $var1b = /teams[_.]security[_.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9+\/]{42,44}={0,2}['"]?/ nocase
+        $var1c = /teams[_.]webhook[_.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9+\/]{42,44}={0,2}['"]?/ nocase
+
+        // $var2 — outgoing_webhook_secret
+        $var2  = /outgoing[_.]webhook[_.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9+\/]{42,44}={0,2}['"]?/ nocase
 
     condition:
         any of them
@@ -111,15 +115,20 @@ rule Teams_Graph_API_Bot_Secret
 
     strings:
         // Bot Framework / Teams bot config file patterns
-        $var1 = /MicrosoftAppPassword\s*=\s*['"]?[A-Za-z0-9\.\-_~]{34,42}['"]?/
-        $var2 = /BOT[_\.]?(?:APP[_\.]?)?(?:PASSWORD|SECRET)\s*=\s*['"]?[A-Za-z0-9\.\-_~]{34,42}['"]?/  nocase
+        $var1  = /MicrosoftAppPassword[ \t]*=[ \t]*['"]?[A-Za-z0-9.\-_~]{34,42}['"]?/
+
+        // BOT_PASSWORD / BOT_SECRET / BOT_APP_PASSWORD / BOT_APP_SECRET
+        $var2a = /BOT[_.]APP[_.]PASSWORD[ \t]*=[ \t]*['"]?[A-Za-z0-9.\-_~]{34,42}['"]?/ nocase
+        $var2b = /BOT[_.]APP[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9.\-_~]{34,42}['"]?/ nocase
+        $var2c = /BOT[_.]PASSWORD[ \t]*=[ \t]*['"]?[A-Za-z0-9.\-_~]{34,42}['"]?/ nocase
+        $var2d = /BOT[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9.\-_~]{34,42}['"]?/ nocase
 
         // appsettings.json pattern (common in C# Teams bots)
-        $json1 = /"MicrosoftAppPassword"\s*:\s*"[A-Za-z0-9\.\-_~]{34,42}"/
-        $json2 = /"MicrosoftAppId"\s*:\s*"[0-9a-f\-]{36}"/
+        $json1 = /"MicrosoftAppPassword"[ \t]*:[ \t]*"[A-Za-z0-9.\-_~]{34,42}"/
+        $json2 = /"MicrosoftAppId"[ \t]*:[ \t]*"[0-9a-f\-]{36}"/
 
     condition:
-        ($var1 or $var2 or $json1) or ($json1 and $json2)
+        ($var1 or any of ($var2*) or $json1) or ($json1 and $json2)
 }
 
 
@@ -138,17 +147,17 @@ rule Teams_API_Secret_Service_Auth
 
     strings:
         // apiSecretRegistrationId in Teams app manifest (JSON)
-        // Microsoft explicitly warns this must be secured — leaking it
-        // allows an attacker to register their own app using this key registration
-        $reg_id_json   = /"apiSecretRegistrationId"\s*:\s*"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/
+        $reg_id_json   = /"apiSecretRegistrationId"[ \t]*:[ \t]*"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/
 
         // apiSecretServiceAuthConfiguration block in manifest (structural anchor)
         $auth_config   = "\"authType\": \"apiSecretServiceAuth\""
 
         // Bearer token injection pattern in server-side code
-        // (dev hardcoding the API key that Teams will forward to their endpoint)
-        $bearer_key1   = /Authorization:\s*Bearer\s+[A-Za-z0-9\-_\.~!@#$%^&*]{10,}/  nocase
-        $bearer_key2   = /TEAMS[_\.]?API[_\.]?(?:SECRET|KEY)\s*=\s*['\"]?[A-Za-z0-9\-_\.~]{10,2048}['\"]?/  nocase
+        $bearer_key1   = /Authorization:[ \t]*Bearer[ \t]+[A-Za-z0-9\-_.~!@#$%^&*]{10,}/ nocase
+
+        // TEAMS_API_SECRET / TEAMS_API_KEY — split to avoid (?:...) group
+        $bearer_key2a  = /TEAMS[_.]API[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9\-_.~]{10,2048}['"]?/ nocase
+        $bearer_key2b  = /TEAMS[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9\-_.~]{10,2048}['"]?/ nocase
 
         // Manifest composeExtensions block with apiBased type
         $compose_type  = "\"composeExtensionType\": \"apiBased\""
@@ -163,5 +172,5 @@ rule Teams_API_Secret_Service_Auth
         ($reg_id_json and $compose_type)
         or
         // Variable name anchor for the API key itself
-        $bearer_key2
+        ($bearer_key1 or $bearer_key2a or $bearer_key2b)
 }
