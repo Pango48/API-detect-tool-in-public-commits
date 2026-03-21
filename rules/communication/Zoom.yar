@@ -41,12 +41,12 @@ rule Zoom_S2S_OAuth_Credentials
 
     strings:
         // All three credentials typically appear together in .env files
-        $account_id     = /ZOOM_ACCOUNT_ID\s*=\s*['"]?[A-Za-z0-9_\-]{22}['"]?/
-        $client_id      = /ZOOM_CLIENT_ID\s*=\s*['"]?[A-Za-z0-9_\-]{22}['"]?/
-        $client_secret  = /ZOOM_CLIENT_SECRET\s*=\s*['"]?[A-Za-z0-9_\-]{32}['"]?/
+        $account_id     = /ZOOM_ACCOUNT_ID[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{22}['"]?/
+        $client_id      = /ZOOM_CLIENT_ID[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{22}['"]?/
+        $client_secret  = /ZOOM_CLIENT_SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{32}['"]?/
 
         // Lowercase variants
-        $client_sec2    = /zoom[_\.]?client[_\.]?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{32}['"]?/  nocase
+        $client_sec2    = /zoom[_.]client[_.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{32}['"]?/ nocase
 
     condition:
         // High confidence: all three present (typical .env leak)
@@ -71,13 +71,19 @@ rule Zoom_Legacy_JWT_Credentials
         tags           = "zoom,jwt,legacy,api-key,deprecated"
 
     strings:
-        // Zoom JWT API key (~22 alphanumeric chars)
-        $jwt_key1   = /ZOOM[_\.]?(?:JWT[_\.]?)?API[_\.]?KEY\s*=\s*['"]?[A-Za-z0-9_\-]{22}['"]?/  nocase
-        $jwt_key2   = /zoom[_\.]?api[_\.]?key\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{22}['"]?/  nocase
+        // Zoom JWT API key — with JWT infix
+        $jwt_key1a  = /ZOOM[_.]JWT[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{22}['"]?/ nocase
+        // Zoom JWT API key — without JWT infix
+        $jwt_key1b  = /ZOOM[_.]API[_.]KEY[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{22}['"]?/ nocase
+        // Generic config pattern
+        $jwt_key2   = /zoom[_.]api[_.]key[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{22}['"]?/ nocase
 
-        // Zoom JWT API secret (~32 alphanumeric chars)
-        $jwt_sec1   = /ZOOM[_\.]?(?:JWT[_\.]?)?API[_\.]?SECRET\s*=\s*['"]?[A-Za-z0-9_\-]{32}['"]?/  nocase
-        $jwt_sec2   = /zoom[_\.]?api[_\.]?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{32}['"]?/  nocase
+        // Zoom JWT API secret — with JWT infix
+        $jwt_sec1a  = /ZOOM[_.]JWT[_.]API[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{32}['"]?/ nocase
+        // Zoom JWT API secret — without JWT infix
+        $jwt_sec1b  = /ZOOM[_.]API[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{32}['"]?/ nocase
+        // Generic config pattern
+        $jwt_sec2   = /zoom[_.]api[_.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{32}['"]?/ nocase
 
     condition:
         any of them
@@ -97,13 +103,13 @@ rule Zoom_OAuth_Access_Token
         tags           = "zoom,oauth,access-token"
 
     strings:
-        // Access token variable anchor — token itself is a JWT (~200+ chars)
-        $var1   = /ZOOM[_\.]?ACCESS[_\.]?TOKEN\s*=\s*['"]?[A-Za-z0-9_\-]{20,}['"]?/  nocase
-        $var2   = /zoom[_\.]?token\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{20,}['"]?/  nocase
+        // Access token variable anchor
+        $var1   = /ZOOM[_.]ACCESS[_.]TOKEN[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{20,}['"]?/ nocase
+        $var2   = /zoom[_.]token[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{20,}['"]?/ nocase
 
         // API endpoint anchor + Bearer auth header
         $api    = "https://api.zoom.us/v2/"
-        $bearer = /Authorization:\s*Bearer\s+[A-Za-z0-9_\-\.]{20,}/  nocase
+        $bearer = /Authorization:[ \t]*Bearer[ \t]+[A-Za-z0-9_\-\.]{20,}/ nocase
 
     condition:
         ($api and $bearer) or any of ($var*)
@@ -124,8 +130,12 @@ rule Zoom_Webhook_Secret_Token
         tags           = "zoom,webhook,secret-token"
 
     strings:
-        $var1 = /ZOOM[_\.]?WEBHOOK[_\.]?SECRET(?:[_\.]?TOKEN)?\s*=\s*['"]?[A-Za-z0-9_\-]{32,}['"]?/  nocase
-        $var2 = /zoom[_\.]?webhook[_\.]?secret\s*[=:"']{1,3}\s*['"]?[A-Za-z0-9_\-]{32,}['"]?/  nocase
+        // ZOOM_WEBHOOK_SECRET_TOKEN — with TOKEN suffix
+        $var1a  = /ZOOM[_.]WEBHOOK[_.]SECRET[_.]TOKEN[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{32,}['"]?/ nocase
+        // ZOOM_WEBHOOK_SECRET — without TOKEN suffix
+        $var1b  = /ZOOM[_.]WEBHOOK[_.]SECRET[ \t]*=[ \t]*['"]?[A-Za-z0-9_\-]{32,}['"]?/ nocase
+        // Generic config pattern
+        $var2   = /zoom[_.]webhook[_.]secret[ \t]*[=:"']{1,3}[ \t]*['"]?[A-Za-z0-9_\-]{32,}['"]?/ nocase
 
     condition:
         any of them
